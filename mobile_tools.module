@@ -84,14 +84,14 @@ function mobile_tools_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 0,
   );
-  $items['admin/settings/mobile-tools/ready'] = array(
+  /*$items['admin/settings/mobile-tools/ready'] = array(
     'title' => 'ready.mobi',
    // 'page arguments' => array('mobile_tools_roles_configuration_form'),
     'page callback' => 'mobile_tools_ready_mobi',
      'access arguments' => array('configure Mobile Tools'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 0,
-  );
+  );*/
   return $items;
 } 
 /**
