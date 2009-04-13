@@ -306,7 +306,8 @@ function mobile_tools_detection_configuration_form() {
     '#type' => 'radios',
     '#title' => 'Device detection module',
     '#default_value' => variable_get('mobile-tools-device-detection', 'mobile_tools'),
-    '#options' => _mobile_tools_external('device-detection')
+    '#options' => _mobile_tools_external('device-detection'),
+    '#description' => t('Choose which module is in charge for detecting if the visiting device is a mobile device. The Mobile Tools provides a standard implementation. You can also use other modules'),
   );
   $form['mobile_tools_detection']['mobile-tools-site-type-detection'] = array(
     '#type' => 'radios',
@@ -314,6 +315,14 @@ function mobile_tools_detection_configuration_form() {
     '#default_value' => variable_get('mobile-tools-site-type-detection', 'mobile_tools'),
     '#options' => _mobile_tools_external('site-type-detection'),
     '#description' => 'This option is only used when your Drupal site is used for both the mobile as desktop version of the site.'
+  );
+  
+  $form['mobile_tools_detection']['mobile-tools-device-capabilities'] = array(
+    '#type' => 'radios',
+    '#title' => 'Device capability detection',
+    '#default_value' => variable_get('mobile-tools-device-capabilities', 'wurfl'),
+    '#options' => _mobile_tools_external('device-capability'),
+    '#description' => t('The mobile tools module gives an abstract api in order to get capabilities of the mobile devices. These capability can be fetched by calling mobile_tools_devicecapability($capability). Capability can be for example "is_wireless_device". A full range of parameters can be found on !wurfl you need at least one capability module (like !wurfl2) to use this functionality', array('!wurfl' => l('http://wurfl.sourceforge.net/help_doc.php', 'http://wurfl.sourceforge.net/help_doc.php'), '!wurfl2' => l('http://drupal.org/project/wurfl', 'http://drupal.org/project/wurfl')))
   );
   return system_settings_form($form);
 }
@@ -482,6 +491,9 @@ function _mobile_tools_external($type) {
     break;
     case 'site-type-detection':
       $modules = module_implements('is_mobile_site');
+    break;
+    case 'device-capability':
+      $modules = module_implements('devicecapability');
     break;
   }  
   return array_combine($modules, $modules);
@@ -852,3 +864,12 @@ function mobile_tools_create_mobile_url($url) {
   $role->sibling['name'] = $sibling->name ;
   return $role;
 } 
+
+/**
+ *
+ *
+ */
+function mobile_tools_devicecapability($capability) {
+   return module_invoke(variable_get('mobile-tools-device-capability', 'wurfl'), 'devicecapability', $capability);
+
+}  
