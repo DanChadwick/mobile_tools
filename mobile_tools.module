@@ -520,30 +520,18 @@ function mobile_tools_is_mobile_device() {
   $user_agent       = $_SERVER['HTTP_USER_AGENT']; // get the user agent value - this should be cleaned to ensure no nefarious input gets executed
   $accept           = $_SERVER['HTTP_ACCEPT']; // get the content accept value - this should be cleaned to ensure no nefarious input gets executed
   
-   switch (TRUE) { // using a switch against the following statements which could return TRUE is more efficient than the previous method of using if statements
+   switch (TRUE) { 
     case (eregi('ipod', $user_agent)||eregi('iphone', $user_agent)); // we find the words iphone or ipod in the user agent
-      $mobile_browser = $iphone; // mobile browser is either TRUE or FALSE depending on the setting of iphone when calling the function
-      if (substr($iphone, 0, 4)=='http') { // does the value of iphone resemble a url
-        $mobileredirect = $iphone; // set the mobile redirect url to the url value stored in the iphone value
-      } // ends the if for iphone being a url
+      $mobile_browser = TRUE; // mobile browser is either TRUE or FALSE depending on the setting of iphone when calling the function
     break; // break out and skip the rest if we've had a match on the iphone or ipod
     case (eregi('android',$user_agent));  // we find android in the user agent
-      $mobile_browser = $android; // mobile browser is either TRUE or FALSE depending on the setting of android when calling the function
-      if (substr($android, 0, 4)=='http') { // does the value of android resemble a url
-        $mobileredirect = $android; // set the mobile redirect url to the url value stored in the android value
-      } // ends the if for android being a url
+      $mobile_browser = TRUE; // mobile browser is either TRUE or FALSE depending on the setting of android when calling the function
     break; // break out and skip the rest if we've had a match on android
     case (eregi('opera mini',$user_agent)); // we find opera mini in the user agent
-      $mobile_browser = $opera; // mobile browser is either TRUE or FALSE depending on the setting of opera when calling the function
-      if (substr($opera, 0, 4)=='http') { // does the value of opera resemble a rul
-        $mobileredirect = $opera; // set the mobile redirect url to the url value stored in the opera value
-      } // ends the if for opera being a url 
+      $mobile_browser = TRUE; // mobile browser is either TRUE or FALSE depending on the setting of opera when calling the function
     break; // break out and skip the rest if we've had a match on opera
     case (eregi('blackberry',$user_agent)); // we find blackberry in the user agent
-      $mobile_browser = $blackberry; // mobile browser is either TRUE or FALSE depending on the setting of blackberry when calling the function
-      if (substr($blackberry, 0, 4)=='http') { // does the value of blackberry resemble a rul
-        $mobileredirect = $blackberry; // set the mobile redirect url to the url value stored in the blackberry value
-      } // ends the if for blackberry being a url 
+      $mobile_browser = TRUE; // mobile browser is either TRUE or FALSE depending on the setting of blackberry when calling the function
     break; // break out and skip the rest if we've had a match on blackberry
     case (preg_match('/(up.browser|up.link|mmp|symbian|smartphone|midp|wap|vodafone|o2|pocket|kindle|mobile|pda|psp|treo)/i',$user_agent)); // check if any of the values listed create a match on the user agent - these are some of the most common terms used in agents to identify them as being mobile devices - the i at the end makes it case insensitive
       $mobile_browser = TRUE; // set mobile browser to TRUE
