@@ -554,12 +554,11 @@ function mobile_tools_is_mobile_device() {
  *  Detection of the site type . the values comes out the configuration form.
  */ 
 function mobile_tools_is_mobile_site() {
-  $mobile_url  = parse_url(variable_get('mobile_url', FALSE));
+  $mobile_url  = parse_url(variable_get('mobile_tools_mobile_url', FALSE));
   $mobile_url['host'] = mobile_tools_prepare_url($mobile_url['host']);
-  $desktop_url = parse_url(variable_get('desktop_url', FALSE));
+  $desktop_url = parse_url(variable_get('mobile_tools_desktop_url', FALSE));
   $mobile_url['host'] = mobile_tools_prepare_url($mobile_url['host']);
   $server_name = mobile_tools_prepare_url($_SERVER['SERVER_NAME']);
- 
   // Check domain first
   if ($mobile_url['host'] == $server_name && $desktop_url['host'] != $server_name) { 
     return 'mobile';
@@ -617,8 +616,8 @@ function mobile_tools_get_device() {
  */ 
 function mobile_tools_token_values($type, $object = NULL) {
   if ($type == 'mobile_tools') {
-    $mobile_url = variable_get('mobile_url', FALSE);
-    $desktop_url = variable_get('desktop_url', FALSE);
+    $mobile_url = variable_get('mobile_tools_mobile_url', FALSE);
+    $desktop_url = variable_get('mobile_tools_desktop_url', FALSE);
     if ($mobile_url != FALSE || $desktop_url != FALSE) {
       $tokens['mobile-url']  = l($mobile_url, $mobile_url);
       $tokens['desktop-url'] = l($desktop_url, $desktop_url);
