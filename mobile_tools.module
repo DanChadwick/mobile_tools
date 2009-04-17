@@ -102,7 +102,7 @@ global $conf;
   global $user;
  // Invoke the hook_is_mobile_device() and hook_is_mobile_site()
   $_SESSION['mobile-tools-mobile-device'] = module_invoke(variable_get('mobile-tools-device-detection', 'mobile_tools'), 'is_mobile_device');
-  $_SESSION['mobile-tools-site-type'] = module_invoke(variable_get('mobile-tools-site-type-detection', 'mobile_tools'), 'is_mobile_site');
+  $_SESSION['mobile-tools-site-type'] = module_invoke(variable_get('mobile-tools-site-type-detection', 'mobile_tools'), 'is_mobile_site'); 
   if (variable_get('mobile_tools_enable_redirect', 0) == 1 ) {
     mobile_tools_detection_init(); // do the device detection, redirect or generate a notification
   }
@@ -131,8 +131,8 @@ function mobile_tools_detection_init() {
       case 'nothing': //do nothing
       break;
       case 'redirect': //redirect
-        $destination = ($_SESSION['mobile-tools-mobile-device'] == 'mobile') ? variable_get('mobile_url', FALSE) : variable_get('desktop_url', FALSE);
-       // mobile_tools_redirect($destination);
+        $destination = ($_SESSION['mobile-tools-mobile-device'] == 'mobile') ? variable_get('mobile_tools_mobile_url', FALSE) : variable_get('mobile_tools_desktop_url', FALSE);
+      mobile_tools_redirect($destination);
       break;
       case 'notification': // set message
         if (variable_get('mobile_tools_method', 'message') == 'message') {
@@ -632,8 +632,7 @@ function mobile_tools_token_values($type, $object = NULL) {
  *  Function used to redirect the user to the mobile site
  */ 
 function mobile_tools_redirect($destination) {
-  header('Location: '.$redirect); // redirect to the right url for this device
-  exit;
+  drupal_goto($destination); // redirect to the right url for this device
 }
 /**
  * Altering the form for theme configuration to indicate that the theme is being used
