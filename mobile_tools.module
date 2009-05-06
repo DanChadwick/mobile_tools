@@ -103,7 +103,7 @@ global $conf;
  // Invoke the hook_is_mobile_device() and hook_is_mobile_site()
   $_SESSION['mobile-tools-mobile-device'] = module_invoke(variable_get('mobile-tools-device-detection', 'mobile_tools'), 'is_mobile_device');
   $_SESSION['mobile-tools-site-type'] = module_invoke(variable_get('mobile-tools-site-type-detection', 'mobile_tools'), 'is_mobile_site'); 
-  if (variable_get('mobile_tools_enable_redirect', 0) == 1 ) {
+  if (variable_get('mobile_tools_enable_redirect', 0) == 1 && variable_get('mobile_tools_mobile_url', '') != variable_get('mobile_tools_desktop_url', '')) {
     mobile_tools_detection_init(); // do the device detection, redirect or generate a notification
   }
   if (variable_get('mobile_tools_enable_theme', 0)) {
@@ -569,8 +569,6 @@ function mobile_tools_is_mobile_site() {
     $significant = (strlen($mobile_url['path']) > strlen($desktop_url['path'])) ? 'mobile' : 'desktop'; //we check the most significatn url (with the longest path)
     if (preg_match("|" . $desktop_url['path'] . "|", request_uri())) {
       if (preg_match("|" . $mobile_url['path'] . "|", request_uri())) {
- drupal_set_message("significant");
-        drupal_set_message('welcome');
         return $significant; // if both patterns match, return the significant
       }
     
