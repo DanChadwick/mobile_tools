@@ -440,6 +440,11 @@ function mobile_tools_user_roles() {
  * Configuration form for configuring the mobile context in the theming system
  */ 
 function mobile_tools_themes_configuration_form() {
+  $themes = mobile_tools_list_theme_names();
+  $prefix = '';
+  if (count($themes) == 0) {
+    $warning = '<div class="message error">You must enable themes in order to use theme switching</div>';
+  } 
   $form['mobile_tools_theme_configuration'] = array(
     '#type' => 'fieldset',
     '#title' => 'Theming configuration',
@@ -448,22 +453,25 @@ function mobile_tools_themes_configuration_form() {
     specific for mobile users. See !url for more information on this configuration. In order to use this functionality
     you will have to manually create a second *.info file in your theme directory.', array('!url' => l('help', 'help'))),
     '#suffix' => t('If enabled, !configure the settings of your mobile theme and manage the !blocks layout', array('!configure' => l('configure', 'admin/build/themes'), '!blocks' => l('blocks', 'admin/build/block'))) .'<br>',
+    '#prefix' => $warning,
    );
+  if (count($themes) > 0 ) {
    $form['mobile_tools_theme_configuration']['mobile_tools_enable_theme'] = array(
     '#type' => 'checkbox',
     '#title' => 'Enable the mobile theme',
     '#default_value' => variable_get('mobile_tools_enable_theme', 0),
     '#description' => t('This option will only work if you have manually created a second *.info file in your theme directory.'),
    );
+   
    $form['mobile_tools_theme_configuration']['mobile_tools_theme_name'] = array(
      '#type' => 'select',
      '#title' => 'Mobile theme',
      '#default_value' => variable_get("mobile_tools_theme_name", FALSE),
-     '#options' => mobile_tools_list_theme_names(),
+     '#options' => $themes,
      '#description' => t('Select your mobile theme. See <a href="">help</a> for information on the name'),
     '#suffix' => t('TIP: You can create your own mobile theme for the mobile version of your site. You can also reuse your existing theme and reconfigure the block layout or global theme settings . to do this, copy your existing theme in your theme folder and rename (both folder name and the *.info file). You have now a new theme that you can configure.'), 
    );
-   
+
    // for each group, checkbox and dropdown
    // Mobile
    $mobile_groups = module_invoke(variable_get('mobile-tools-device-detection', 'mobile_tools'), 'device_groups');   
@@ -481,13 +489,14 @@ function mobile_tools_themes_configuration_form() {
         '#default_value' => variable_get($mobile_detection_module . '_' . $group . '_enable', ''),
         '#description' => t('Choose a theme for this device group'),
       );
-     $form['mobile_tools_theme_configuration']['mobile_tools_' . $group][$mobile_detection_module . '_' . $group . '_theme'] = array(
-       '#type' => 'select',
-       '#title' => 'Mobile theme',
-       '#default_value' => variable_get($mobile_detection_module . '_' . $group . '_theme', FALSE),
-       '#options' => mobile_tools_list_theme_names(),
-       '#description' => t('Select your mobile theme. See <a href="">help</a> for information on the name'),
-    );
+       $form['mobile_tools_theme_configuration']['mobile_tools_' . $group][$mobile_detection_module . '_' . $group . '_theme'] = array(
+         '#type' => 'select',
+         '#title' => 'Mobile theme',
+         '#default_value' => variable_get($mobile_detection_module . '_' . $group . '_theme', FALSE),
+         '#options' => $themes,
+         '#description' => t('Select your mobile theme. See <a href="">help</a> for information on the name'),
+      );
+     } 
    }
    return system_settings_form($form);
 }
@@ -504,7 +513,11 @@ function mobile_tools_list_theme_names() {
       $list[] = $key;
     }    
   }
-  return array_combine($list, $list);
+  if (count($list) == 0) {
+    return array();
+  } else {
+    return array_combine($list, $list);
+  }
 }
 /**
  *  Helper function to return the options for definition of the Drupal usage
@@ -885,12 +898,11 @@ function mobile_tools_create_mobile_url($url) {
 } 
 
 /**
- *
- *
+ * Implementation of hook_devicecapability()
+ * This default implementation invokes the responsible module
  */
 function mobile_tools_devicecapability($capability) {
    return module_invoke(variable_get('mobile-tools-device-capability', 'wurfl'), 'devicecapability', $capability);
-
 }  
 
 /**
