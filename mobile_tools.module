@@ -8,13 +8,7 @@
  * - Adding a mobile context to the permission system
  * - Adding a mobile context to theming (= theme switching or seperate configuration for desktop and )     
  *  
- * The module provides hooks for other modules that can override device detection or site type detection functionality:
- *  - hook_is_mobile_device() returns 'mobile' when accessed by a mobile device or 'desktop' in case of a desktop site
- *    The Mobile Tools module has a standard implementations . third party modules could query databases (e.g. deviceatlas, 
- *    handsetdetection.com  ) 
- *  - hook_is_mobile_site() returns true when Drupal is being prepared for display a mobile device . this can be just the selection of a mobile theme, of transcoding. 
- * 
- * For more documentation and examples please go to http://www.mobiledrupal.com  
+ * For more documentation and examples please go to http://drupal.org/node/459686
  */ 
  /* The default messages being displayed to the users . these can be overwritten in 
   * the configuration panel
@@ -28,18 +22,8 @@
 function mobile_tools_help($path, $arg) {
 switch ($path) {
     case 'admin/help#mobile_tools':
-      $output .= '<p>'. t('The mobile tools module assembles a range of functionality helping out in making your Drupal site mobile.') .'<p>';
-      $output .= '<p>'. t('The main contributions of the module are: ');
-      $output .= '<ul><li>'. t('Detection of a mobile user and display of a notification message or automatically redirection to the mobile site.') .'</li>';
-      $output .= '<li>'. t('Adding a mobile context to each user role . this allows role based adaptations of functionality or permission of your site. Example of modules that can be used to interact with the extended permission system are:');
-      $output .= '<ul><li>'. l('Node Access', 'http://drupal.org/project/nodeaccess') .' :'. t('Allows changing the permission of individual content items and make them available or not towards mobile users');
-      $output .= '<li>'. l('Menu per role', 'http://drupal.org/project/menu_per_role') .' :'. t('Certain menu items can be disabled for mobile user roles.');
-      $output .= '<li>'. l('Frontpage', 'http://drupal.org/project/front') .' :'. t('For mobile users the frontpage can be changed to a more mobile friendly page or a custom page.');
-      $output .= '<li>'. t('any other role based module can be used...') .'</li></ul>';
-      $output .= '<li>'. t('Theme switching for the mobile user');
-      $output .= '<ul><li>'. t('A new mobile theme can be selected to be used on a mobile device') .'</li>';
-      $output .= '<li>'. t('The same desktop theme can be duplicated by copying the current theme and renaming the folder and *.info file . this duplicated theme can be configured and adapted by using a content adaptation engine like !siruna', array('!siruna' => l('http://open.siruna.org', 'Siruna'))) .'</li>'; 
-      $output .= '</ul>';
+      $output .= '<p>'. t('The mobile tools module assembles a range of functionality helping out in making your Drupal site mobile. Visit the !documentation for more information') .'<p>';
+
   }
   return $output;
 }
@@ -109,7 +93,7 @@ global $conf;
   if (variable_get('mobile_tools_enable_theme', 0)) {
     mobile_tools_themes_init(); // changes the theme
   }
-  if (variable_get('mobile_tools_enable_roles', 0)) {
+  if (variable_get('mobile_tools_enable_roles', 0) ) {
     mobile_tools_roles_init();  // assigns the user the mobile role
   }
   if ($_SESSION['mobile-tools-site-type']['type'] == 'mobile') {
@@ -191,14 +175,10 @@ function mobile_tools_roles_init() {
   $roles = $user->roles;
   foreach ($roles as $key => $value) {
     $role = mobile_tools_roles_info(array('id' => $key));
-    if ($role->type == 'desktop' && $role->has_sibling == 1) {
+    if ($role->type == 'desktop' && $role->has_sibling == 1 && $_SESSION['mobile-tools-site-type'] == 'mobile') {
       unset($user->roles[$key]);
       $user->roles[$role->sibling['id']] = $role->sibling['name'];  
     }
-  }
-  if ($_SESSION['mobile-tools-site-type'] == 'mobile') {
-    unset($user->roles);
-    $user->roles[variable_get('mobile_tools_role_id', FALSE)] = 'Mobile';
   }
 }
 /**
@@ -552,10 +532,15 @@ function _mobile_tools_external($type) {
 function mobile_tools_user($op, &$edit, &$account, $category = NULL) {
   switch ($op) {
     case 'load':
-      if (mobile_tools_is_mobile_site() && (variable_get('mobile_tools_roles', 0) == 1)) {
-       unset($account->roles);
-       $account->roles[variable_get('mobile_tools_role_id', FALSE)] = 'mobile user'; 
-      }
+      $user = $account;
+      $roles = $user->roles;
+  foreach ($roles as $key => $value) {
+    $role = mobile_tools_roles_info(array('id' => $key));
+    if ($role->type == 'desktop' && $role->has_sibling == 1 && $_SESSION['mobile-tools-site-type'] == 'mobile') {
+      unset($user->roles[$key]);
+      $user->roles[$role->sibling['id']] = $role->sibling['name'];  
+    }
+  }
     break;
   }
 }
