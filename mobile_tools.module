@@ -175,7 +175,7 @@ function mobile_tools_roles_init() {
   $roles = $user->roles;
   foreach ($roles as $key => $value) {
     $role = mobile_tools_roles_info(array('id' => $key));
-    if ($role->type == 'desktop' && $role->has_sibling == 1 && $_SESSION['mobile-tools-site-type'] == 'mobile') {
+    if ($role->type == 'desktop' && $role->has_sibling == 1 && $_SESSION['mobile-tools-site-type'] == 'mobile' || ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && variable_get('mobile_tools_handling', FALSE) == 'theme-switch')) {
       unset($user->roles[$key]);
       $user->roles[$role->sibling['id']] = $role->sibling['name'];  
     }
