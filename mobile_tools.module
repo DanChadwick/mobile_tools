@@ -80,13 +80,12 @@ function mobile_tools_menu() {
 } 
 
 /**
- *  Implementation of hook_init().
+ *  Implementation of hook_boot().
  */ 
 function mobile_tools_boot() {
 
 global $conf;
   global $user;
-  drupal_set_message('init2');
  // Invoke the hook_is_mobile_device() and hook_is_mobile_site()
   $_SESSION['mobile-tools-mobile-device'] = module_invoke(variable_get('mobile-tools-device-detection', 'mobile_tools'), 'is_mobile_device');
   $_SESSION['mobile-tools-site-type'] = module_invoke(variable_get('mobile-tools-site-type-detection', 'mobile_tools'), 'is_mobile_site'); 
@@ -114,7 +113,6 @@ global $conf;
  */ 
 function mobile_tools_detection_init() {
   $handling = variable_get('mobile_tools_handling', 0); 
-  drupal_set_message($handling);
   if ($_SESSION['mobile-tools-mobile-device']['type'] != $_SESSION['mobile-tools-site-type']) {
     switch ($handling) {
       case 'nothing': //do nothing
@@ -124,7 +122,6 @@ function mobile_tools_detection_init() {
         mobile_tools_redirect($destination);
       break;
       case 'notification': // set message
-        drupal_set_message('notification'); 
         if (variable_get('mobile_tools_method', 'message') == 'message') {
           mobile_tools_set_message();
         }
@@ -228,7 +225,7 @@ function mobile_tools_detection_configuration_form() {
   
   $form['mobile_tools_configuration']['mobile_tools_enable_redirect'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable Redirection / notification'),
+    '#title' => t('Enable device detection and further processing (dedirection / notification / theme switching)'),
     '#description' => t('Enable or disable the notification and redirection functionality!'),
     '#default_value' => variable_get('mobile_tools_enable_redirect', 0),
   );
