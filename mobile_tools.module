@@ -13,8 +13,8 @@
  /* The default messages being displayed to the users . these can be overwritten in 
   * the configuration panel
   */    
- define(MOBILE_NOTIFICATION, t('Check out our mobile site at [mobile-url].'));
- define(DESKTOP_NOTIFICATION, t('Check out our desktop site at [desktop-url]'));
+ define('MOBILE_NOTIFICATION', 'Check out our mobile site at [mobile-url].');
+ define('DESKTOP_NOTIFICATION', 'Check out our desktop site at [desktop-url]');
  
  /**
  * Implementation of hook_help($section).
@@ -78,15 +78,19 @@ function mobile_tools_menu() {
   );*/
   return $items;
 } 
+
 /**
  *  Implementation of hook_init().
  */ 
-function mobile_tools_init() {
+function mobile_tools_boot() {
+
 global $conf;
   global $user;
+  drupal_set_message('init2');
  // Invoke the hook_is_mobile_device() and hook_is_mobile_site()
   $_SESSION['mobile-tools-mobile-device'] = module_invoke(variable_get('mobile-tools-device-detection', 'mobile_tools'), 'is_mobile_device');
   $_SESSION['mobile-tools-site-type'] = module_invoke(variable_get('mobile-tools-site-type-detection', 'mobile_tools'), 'is_mobile_site'); 
+  
   if (variable_get('mobile_tools_enable_redirect', 0) == 1 && variable_get('mobile_tools_mobile_url', '') != variable_get('mobile_tools_desktop_url', '')) {
     mobile_tools_detection_init(); // do the device detection, redirect or generate a notification
   }
@@ -96,7 +100,7 @@ global $conf;
   if (variable_get('mobile_tools_enable_roles', 0) ) {
     mobile_tools_roles_init();  // assigns the user the mobile role
   }
-  if ($_SESSION['mobile-tools-site-type']['type'] == 'mobile') {
+  if ($_SESSION['mobile-tools-site-type'] == 'mobile') {
     variable_set('default_nodes_main', variable_get('default_nodes_main_mobile', 5));
   } 
   else {
@@ -110,6 +114,7 @@ global $conf;
  */ 
 function mobile_tools_detection_init() {
   $handling = variable_get('mobile_tools_handling', 0); 
+  drupal_set_message($handling);
   if ($_SESSION['mobile-tools-mobile-device']['type'] != $_SESSION['mobile-tools-site-type']) {
     switch ($handling) {
       case 'nothing': //do nothing
@@ -119,6 +124,7 @@ function mobile_tools_detection_init() {
         mobile_tools_redirect($destination);
       break;
       case 'notification': // set message
+        drupal_set_message('notification'); 
         if (variable_get('mobile_tools_method', 'message') == 'message') {
           mobile_tools_set_message();
         }
@@ -191,6 +197,7 @@ function mobile_tools_block($op = 'list',  $delta = 0, $edit = array()) {
     case 'list':
        if (variable_get('mobile_tools_method', 'message') == 'block') {
         $blocks[0]['info'] = t('Mobile Tools block notification');
+        $blocks[0]['cache'] = BLOCK_NO_CACHE;
         return $blocks;
        }
     break;
@@ -589,7 +596,15 @@ function mobile_tools_is_mobile_device() {
  *  Detection of the site type . the values comes out the configuration form.
  */ 
 function mobile_tools_is_mobile_site() {
-  $mobile_url  = parse_url(variable_get('mobile_tools_mobile_url', FALSE));
+   if (variable_get('mobile-tools-site-type-detection', 'mobile_tools') == 'mobile_tools') {
+      return _mobile_tools_site_detection();
+   } else {
+    return module_invoke(variable_get('mobile-tools-site-type-detection', 'mobile_tools'), 'is_mobile_site'); 
+   }
+}
+
+function _mobile_tools_site_detection() {
+$mobile_url  = parse_url(variable_get('mobile_tools_mobile_url', FALSE));
   $mobile_url['host'] = mobile_tools_prepare_url($mobile_url['host']);
   $desktop_url = parse_url(variable_get('mobile_tools_desktop_url', FALSE));
   $mobile_url['host'] = mobile_tools_prepare_url($mobile_url['host']);
