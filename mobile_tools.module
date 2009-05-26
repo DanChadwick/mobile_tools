@@ -91,7 +91,7 @@ global $conf;
   $_SESSION['mobile-tools-site-type'] = module_invoke(variable_get('mobile-tools-site-type-detection', 'mobile_tools'), 'is_mobile_site'); 
   
   if (variable_get('mobile_tools_enable_redirect', 0) == 1 && variable_get('mobile_tools_mobile_url', '') != variable_get('mobile_tools_desktop_url', '')) {
-    mobile_tools_detection_init(); // do the device detection, redirect or generate a notification
+    mobile_tools_detection_boot(); // do the device detection, redirect or generate a notification
   }
   if (variable_get('mobile_tools_enable_theme', 0)) {
     mobile_tools_themes_init(); // changes the theme
@@ -111,35 +111,18 @@ global $conf;
  * Being called in the hook_init() implementation
  * This function is in charge of device detection, redirection or displaying a notification 
  */ 
-function mobile_tools_detection_init() {
+function mobile_tools_detection_boot() {
   $handling = variable_get('mobile_tools_handling', 0); 
   if ($_SESSION['mobile-tools-mobile-device']['type'] != $_SESSION['mobile-tools-site-type']) {
     switch ($handling) {
-      case 'nothing': //do nothing
-      break;
       case 'redirect': //redirect
         $destination = ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile') ? variable_get('mobile_tools_mobile_url', FALSE) : variable_get('mobile_tools_desktop_url', FALSE);
-        mobile_tools_redirect($destination);
-      break;
-      case 'notification': // set message
-        if (variable_get('mobile_tools_method', 'message') == 'message') {
-          mobile_tools_set_message();
-        }
+        mobile_tools_goto($destination);
       break;
     }
   }
 }
-/**
- *  Sets a drupal message if this handling option is choosen.
- */  
-function mobile_tools_set_message() {
- if (!isset($_SESSION['mobile_device_notification_impressions'])) {
-    $_SESSION['mobile_device_notification_impressions'] = 0;
-  }
-  if (($_SESSION['mobile_device_notification_impressions'] < variable_get('mobile_tools_times', 2) || variable_get('mobile_tools_times', 0) == 0)) {
-    drupal_set_message(_mobile_tools_message()); 
-  }
-}
+
 /**
  *  Helper function returning the configurable message for the notification
  */ 
@@ -192,14 +175,14 @@ function mobile_tools_roles_init() {
 function mobile_tools_block($op = 'list',  $delta = 0, $edit = array()) {
    switch ($op) {
     case 'list':
-       if (variable_get('mobile_tools_method', 'message') == 'block') {
+       if (variable_get('mobile_tools_handling', 'notification') == 'notification') {
         $blocks[0]['info'] = t('Mobile Tools block notification');
         $blocks[0]['cache'] = BLOCK_NO_CACHE;
         return $blocks;
        }
     break;
     case 'view':
-      if (variable_get('mobile_tools_method', 'message') == 'block' && ($_SESSION['mobile-tools-mobile-device']['type']  !=  $_SESSION['mobile-tools-site-type']) ) {
+      if (variable_get('mobile_tools_handling', 'notification') == 'notification' && ($_SESSION['mobile-tools-mobile-device']['type']  !=  $_SESSION['mobile-tools-site-type']) ) {
         $block['title'] = '';
         $block['content'] = _mobile_tools_message();
         return $block;
@@ -234,7 +217,7 @@ function mobile_tools_detection_configuration_form() {
     '#title' => t('Select the appropriate method'),
     '#default_value' => variable_get('mobile_tools_handling', 'notification'),
     '#options' =>   mobile_tools_detection_configuration_options('device handling'),
-    '#description' => t('Choose one of these methodes! Automatic redirection: mobile users will be send to the mobile site, while desktop users will be send to the desktop site; Display a notification: a block message or a drupal notification will be generated when a mobile user visits your desktop site . the message can contain the link to your mobile site; Switch the theme: you can select in the Mobile theme section which theme to be loaded for a mobile user.'),
+    '#description' => t('Choose one of these methodes! Automatic redirection: mobile users will be send to the mobile site, while desktop users will be send to the desktop site; Display a notification: a block message will be generated when a mobile user visits your desktop site . the message can contain the link to your mobile site; Switch the theme: you can select in the Mobile theme section which theme to be loaded for a mobile user.'),
   );
   
   $form['mobile_tools_configuration']['mobile_tools_mobile_url'] = array(
@@ -259,12 +242,7 @@ function mobile_tools_detection_configuration_form() {
     '#description' => t('Choose a text to be displayed to the visitors of your site and how many times the user gets the message . this will be used if you checked the "Display a notification" checkbox in the above configuration.'),
   );
   
-  $form['mobile_tools_notification']['mobile_tools_method'] = array(
-    '#type' => 'radios',
-    '#description' => t('Choose between a block displaying the notification or a notification message'),
-    '#options' => array('block' => t('Message block'), 'message' => t('Notification message')),
-    '#default_value' => variable_get('mobile_tools_method', 'message'),
-  );
+
   $form['mobile_tools_notification']['mobile_tools_times'] = array(
     '#type' => 'textfield',
     '#title' => t('number of impressions'),
@@ -277,17 +255,17 @@ function mobile_tools_detection_configuration_form() {
     '#rows' => 2,
     '#title' => t('To mobile users'),
     '#default_value' => variable_get('mobile_notification', MOBILE_NOTIFICATION),
-    '#description' => t('What message do you want to give mobile users to redirect to the mobile site
-    You can use the placeholder [mobile-url] or [mobile-site-link] . this will be automatically replaced with the url of the mobile site.')
   );
   $form['mobile_tools_notification']['desktop_notification'] = array(
     '#type' => 'textarea',
     '#title' => t('To desktop users'),
     '#rows' => 2,
     '#default_value' => variable_get('desktop_notification', DESKTOP_NOTIFICATION),
-    '#description' => t('What message do you want to give desktop users to redirect to the desktop site (this will be rarely used)
-    You can use the placeholder [desktop-url] or [destkop-site-link] . this will be automatically replaced with the url of the desktop site.'),
+    '#suffix' => mobile_tools_notification_help(),
   ); 
+  
+  
+  
   $form['mobile_tools_detection'] = array(
     '#type' => 'fieldset',
     '#title' => t('External detection modules'),
@@ -318,6 +296,24 @@ function mobile_tools_detection_configuration_form() {
   );
   return system_settings_form($form);
 }
+
+
+function mobile_tools_notification_help() {
+  $output .= '<div class="description">';
+  $output .= 'Define your message that you want to display on your website to mobile users that are on your desktop site, or destkop users that are on your mobile site. Some tokens are available:';
+  $output .= '<ul>';
+  $output .= '<li>[mobile]: Displays the word Mobile. When the mobile user is on the mobile site, no hyperlink is attached to it. When the mobile user is on the desktop site, the word is clickable and brings the user to the mobbile site.';
+  $output .= '<li>[desktop]: The desktop counterpart of [mobile]' ;
+  $output .= '<li>[mobile-site-link]: Dislays the word "mobile" and contains always the link to the mobile site.';
+  $output .= '<li>[desktop-site-link]: Displays the word "desktop" and contains always the link to the desktop site.';
+  $output .= '<li>[mobile-url]: Displays the mobile url ';
+  $output .= '<li>[desktop-url]: Displays the desktop url';
+  $output .= '</ul>';
+  $output .= 'A recommended message is: "Change site: [mobile] | [desktop]"';
+  $output .= '</div>';
+  return $output;
+}
+
 /**
  * Helper function to return the configuration options
  */ 
@@ -327,7 +323,7 @@ function mobile_tools_detection_configuration_options($configuration) {
       $options = array(
         'nothing' => t('Do nothing, just provide the $_SESSION[\'mobile_device\'] variable'), 
         'redirect' => t('Automatic redirection to mobile or desktop site (requires a seperate mobile and desktop url!)'), 
-        'notification' => t('Display a notification with link to mobile site (requires a seperate mobile and destkop url!)'),
+        'notification' => t('Display a block notification with link to mobile site (requires a seperate mobile and destkop url!)'),
         'theme-switch' => t('Switch the theme when a mobile user visits the site (only 1 url for both mobile and desktop url). Enable and configure the mobile theme !here', array('!here' => l('here', 'admin/settings/mobile-tools/themes'))),
       );
     break;
@@ -601,11 +597,14 @@ function mobile_tools_is_mobile_site() {
 }
 
 function _mobile_tools_site_detection() {
-$mobile_url  = parse_url(variable_get('mobile_tools_mobile_url', FALSE));
+  $mobile_url  = parse_url(variable_get('mobile_tools_mobile_url', FALSE));
   $mobile_url['host'] = mobile_tools_prepare_url($mobile_url['host']);
+  
   $desktop_url = parse_url(variable_get('mobile_tools_desktop_url', FALSE));
-  $mobile_url['host'] = mobile_tools_prepare_url($mobile_url['host']);
+  $desktop_url['host'] = mobile_tools_prepare_url($desktop_url['host']);
+  
   $server_name = mobile_tools_prepare_url($_SERVER['SERVER_NAME']);
+  
   // Check domain first
   if ($mobile_url['host'] == $server_name && $desktop_url['host'] != $server_name) { 
     return 'mobile';
@@ -668,16 +667,18 @@ function mobile_tools_token_values($type, $object = NULL) {
       $tokens['desktop-url'] = l($desktop_url, $desktop_url);
       $tokens['mobile-site-link'] = l('mobile site', $mobile_url);
       $tokens['desktop-site-link'] = l('desktop site', $mobile_url);
+      if (mobile_tools_is_mobile_site() == 'mobile') {
+         $tokens['mobile'] = t('Mobile');
+         $tokens['desktop'] = l('Destkop', ''); 
+      } else {
+         $tokens['mobile'] = l('Mobile', 'Mobile');
+         $tokens['desktop'] = t('Desktop');
+      }      
       return $tokens;   
     }
   }
 }
-/**
- *  Function used to redirect the user to the mobile site
- */ 
-function mobile_tools_redirect($destination) {
-  drupal_goto($destination); // redirect to the right url for this device
-}
+
 /**
  * Altering the form for theme configuration to indicate that the theme is being used
  * as a mobile theme. 
@@ -910,3 +911,34 @@ function mobile_tools_devicecapability($capability) {
 function mobile_tools_device_groups() {
   return array('iphone', 'ipod', 'android', 'opera mini', 'blackberry');
 } 
+
+function mobile_tools_goto($path = '', $query = NULL, $fragment = NULL, $http_response_code = 302) {
+
+  $url = $path;
+
+  // Make the given path or URL absolute
+  if (!preg_match('/^[a-z]+:\/\//', $url)) {
+    global $base_url;
+    $url = $base_url .'/'. $url;
+  }
+
+  $url .= (empty($query)    ? '' : '?'. $query);
+  $url .= (empty($fragment) ? '' : '#'. $fragment);
+
+  // Remove newlines from the URL to avoid header injection attacks.
+  $url = str_replace(array("\n", "\r"), '', $url);
+
+  // Before the redirect, allow modules to react to the end of the page request.
+  bootstrap_invoke_all('exit');
+
+  // Even though session_write_close() is registered as a shutdown function, we
+  // need all session data written to the database before redirecting.
+  session_write_close();
+
+  header('Location: '. $url, TRUE, $http_response_code);
+
+  // The "Location" header sends a REDIRECT status code to the http
+  // daemon. In some cases this can go wrong, so we make sure none
+  // of the code below the drupal_goto() call gets executed when we redirect.
+  exit();
+}
