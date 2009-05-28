@@ -87,10 +87,18 @@ function mobile_tools_boot() {
 global $conf;
   global $user;
   global $base_url;
- // Invoke the hook_is_mobile_device() and hook_is_mobile_site()
-  $_SESSION['mobile-tools-mobile-device'] = module_invoke(variable_get('mobile-tools-device-detection', 'mobile_tools'), 'is_mobile_device');
-  $_SESSION['mobile-tools-site-type'] = module_invoke(variable_get('mobile-tools-site-type-detection', 'mobile_tools'), 'is_mobile_site'); 
-  
+  // Invoke the hook_is_mobile_device() and hook_is_mobile_site()
+  $device_detection = variable_get('mobile-tools-device-detection', 'mobile_tools');
+  if ($device_detection != 'mobile_tools') {
+  drupal_load('module', $device_detection);
+  }
+  $site_detection = variable_get('mobile-tools-site-type-detection', 'mobile_tools');
+  if ($site_detection != 'mobile_tools') {
+  drupal_load('module', $site_detection);
+  }
+  $_SESSION['mobile-tools-mobile-device'] = module_invoke($device_detection, 'is_mobile_device');
+  $_SESSION['mobile-tools-site-type'] = module_invoke($site_detection, 'is_mobile_site');
+
   if (variable_get('mobile_tools_enable_redirect', 0) == 1 && variable_get('mobile_tools_mobile_url', mobile_tools_create_mobile_url($base_url)) != variable_get('mobile_tools_desktop_url', $base_url)) {
     mobile_tools_detection_boot(); // do the device detection, redirect or generate a notification
   }
@@ -141,7 +149,7 @@ function _mobile_tools_message() {
  * This function is in charge of changing to the mobile theme 
  */ 
 function mobile_tools_themes_init() {
-  if ($_SESSION['mobile-tools-site-type'] == 'mobile' || (variable_get('mobile_tools_handling', FALSE  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
+  if ($_SESSION['mobile-tools-site-type'] == 'mobile' || (variable_get('mobile_tools_handling', ''  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
     global $conf;
     $group = $_SESSION['mobile-tools-mobile-device']['group'];
     $type = $_SESSION['mobile-tools-mobile-device']['type'];
