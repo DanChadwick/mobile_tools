@@ -114,7 +114,7 @@ function mobile_tools_boot() {
   if (variable_get('mobile_tools_enable_roles', 0) ) {
     mobile_tools_roles_init();  // assigns the user the mobile role
   }
-  if ($_SESSION['mobile-tools-site-type'] == 'mobile') {
+  if ($_SESSION['mobile-tools-site-type'] == 'mobile' || (variable_get('mobile_tools_handling', ''  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile')) {
     variable_set('default_nodes_main', variable_get('default_nodes_main_mobile', 5));
   } 
   else {
@@ -282,8 +282,34 @@ function mobile_tools_detection_configuration_form() {
     '#suffix' => mobile_tools_notification_help(),
   ); 
   
+  $form['frontpage'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'extra',
+    '#collapsible' => true,
+  );
   
-  
+  $form['frontpage']['default_nodes_main_mobile'] = array(
+      '#type' => 'select',
+      '#title' => t('Number of posts on main page for the mobile version'),
+      '#default_value' => variable_get('default_nodes_main_mobile', 10),
+      '#options' => Array(
+              1 => 1,
+              2 => 2,
+              3 => 3,
+              4 => 4,
+              5 => 5,
+              6 => 6,
+              7 => 7,
+              8 => 8,
+              9 => 9,
+              10 => 10,
+              15 => 15,
+              20 => 20,
+              25 => 25,
+              30 => 30,
+          ),
+      '#description' => t('The default maximum number of posts to display per page on overview pages such as the main page (on Mobile).'),
+  );
   $form['mobile_tools_detection'] = array(
     '#type' => 'fieldset',
     '#title' => t('External detection modules'),
