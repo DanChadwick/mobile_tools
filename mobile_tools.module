@@ -79,12 +79,18 @@ function mobile_tools_menu() {
   return $items;
 } 
 
+function mobile_tools_exit() {
+  //drupal_set_message($_SERVER['REQUEST_URI']);
+  cache_clear_all(NULL, 'cache_page', TRUE);
+}
 /**
  *  Implementation of hook_boot().
  */ 
 function mobile_tools_boot() {
-
-global $conf;
+  
+   cache_clear_all(NULL, 'cache_page', TRUE);
+  
+  global $conf;
   global $user;
   global $base_url;
   // Invoke the hook_is_mobile_device() and hook_is_mobile_site()
@@ -149,19 +155,21 @@ function _mobile_tools_message() {
  * This function is in charge of changing to the mobile theme 
  */ 
 function mobile_tools_themes_init() {
+  global $conf;
   if ($_SESSION['mobile-tools-site-type'] == 'mobile' || (variable_get('mobile_tools_handling', ''  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
     global $conf;
     $group = $_SESSION['mobile-tools-mobile-device']['group'];
     $type = $_SESSION['mobile-tools-mobile-device']['type'];
     $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
     if (variable_get($mobile_detection_module . '_' . $group . '_enable', '') == 1) {
-      $conf['theme_default'] = variable_get($mobile_detection_module . '_' . $group . '_theme', '');
+      $conf['theme_default'] = variable_get($mobile_detection_module . '_' . $group . '_theme', $conf['theme_default']);
       
     } else {
-      $conf['theme_default'] = variable_get('mobile_tools_theme_name', '');
+      $conf['theme_default'] = variable_get('mobile_tools_theme_name', $conf['theme_default']);
     }
   }
 }
+
 /**
  * Being called in the hook_init() implementation
  * This function is in charge of changing the user role 
@@ -434,6 +442,8 @@ function mobile_tools_themes_configuration_form() {
   if (count($themes) == 0) {
     $warning = '<div class="message error">You must enable themes in order to use theme switching</div>';
   } 
+  
+  
   $form['mobile_tools_theme_configuration'] = array(
     '#type' => 'fieldset',
     '#title' => 'Theming configuration',
@@ -599,7 +609,8 @@ function mobile_tools_is_mobile_device() {
  */ 
 function mobile_tools_is_mobile_site() {
    if (variable_get('mobile-tools-site-type-detection', 'mobile_tools') == 'mobile_tools') {
-      return _mobile_tools_site_detection();
+      $site = _mobile_tools_site_detection();
+      return $site;
    } else {
     return module_invoke(variable_get('mobile-tools-site-type-detection', 'mobile_tools'), 'is_mobile_site'); 
    }
@@ -624,6 +635,7 @@ function _mobile_tools_site_detection() {
   
   // Check domain first
   if ($mobile_url['host'] == $server_name && $desktop_url['host'] != $server_name) { 
+      
     return 'mobile';
   } 
   else if ($mobile_url['host'] != $server_name && $desktop_url['host'] == $server_name) {
@@ -634,10 +646,10 @@ function _mobile_tools_site_detection() {
       if (preg_match("|" . $mobile_url['path'] . "|", request_uri())) {
         return $significant; // if both patterns match, return the significant
       }
-    
       return 'desktop';
     } 
     else {
+
       return 'mobile';
     }
   } 
@@ -684,7 +696,7 @@ function mobile_tools_token_values($type, $object = NULL) {
       $tokens['mobile-url']  = l($mobile_url, $mobile_url);
       $tokens['desktop-url'] = l($desktop_url, $desktop_url);
       $tokens['mobile-site-link'] = l('mobile site', $mobile_url);
-      $tokens['desktop-site-link'] = l('desktop site', $mobile_url);
+      $tokens['desktop-site-link'] = l('desktop site', $desktop_url);
       if (mobile_tools_is_mobile_site() == 'mobile') {
          $tokens['mobile'] = t('Mobile');
          $tokens['desktop'] = l('Destkop', ''); 
