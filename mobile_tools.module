@@ -365,7 +365,6 @@ function mobile_tools_roles_configuration_form() {
     '#default_value' => variable_get('mobile_tools_enable_roles', 0),
   );
 
-  
   $form['mobile_tools_roles'] = array(
     '#type' => 'fieldset',
     '#title' => t('Mobile roles'),
@@ -607,13 +606,20 @@ function mobile_tools_is_mobile_site() {
 }
 
 function _mobile_tools_site_detection() {
-  global $base_url;
+  global $base_url;  
   $mobile_url  = parse_url(variable_get('mobile_tools_mobile_url', mobile_tools_create_mobile_url($base_url)));
   $mobile_url['host'] = mobile_tools_prepare_url($mobile_url['host']);
-  
+
   $desktop_url = parse_url(variable_get('mobile_tools_desktop_url', $base_url));
   $desktop_url['host'] = mobile_tools_prepare_url($desktop_url['host']);
   
+  if (!array_key_exists('path', $desktop_url)) {
+    $desktop_url['path'] = '';
+  }
+  if (!array_key_exists('path', $mobile_url)) {
+    $mobile_url['path'] = '';
+  }
+
   $server_name = mobile_tools_prepare_url($_SERVER['SERVER_NAME']);
   
   // Check domain first
@@ -837,6 +843,9 @@ function mobile_tools_edit_mobile_role($op, $role) {
  */
 function mobile_tools_create_mobile_url($url) {
   $url_parsed = parse_url($url);
+  if (!array_key_exists('path', $url_parsed)) {
+    $url_parsed['path'] = "";
+  }
   $url = $url_parsed['host'];
   $url = explode('.', $url);
   if (count($url) == 3 ) {
@@ -848,6 +857,7 @@ function mobile_tools_create_mobile_url($url) {
   else {
     return 'http://'.  implode('.', $url)  . $url_parsed['path'] .'/mobile';
   }
+
  }  
  
 /**
