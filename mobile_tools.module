@@ -650,7 +650,7 @@ function _mobile_tools_site_detection() {
     if ($server_domain_elements[0] == 'm') { // check for m.* domain
       return 'mobile';
    }
-    if ($server_domain_elements[count($server_domain_elements) - 1] = 'mobi') { // check for *.mobi
+    if ($server_domain_elements[count($server_domain_elements) - 1] == 'mobi') { // check for *.mobi
      return 'mobile';
     }
   }
