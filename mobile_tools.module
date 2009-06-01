@@ -643,7 +643,20 @@ function mobile_tools_is_mobile_site() {
 }
 
 function _mobile_tools_site_detection() {
-  global $base_url;  
+  global $base_url;    
+    // first check if the url is a m.* or .mobi url!!
+  $server_domain_elements = explode('.', $_SERVER['SERVER_NAME']);
+  if (count($server_domain_elements) > 0 ) {
+    if ($server_domain_elements[0] == 'm') { // check for m.* domain
+      return 'mobile';
+   }
+    if ($server_domain_elements[count($server_domain_elements) - 1] = 'mobi') { // check for *.mobi
+     return 'mobile';
+    }
+  }
+  
+  // If this doesn't return an answer, we will have to do a comparison of the mobile and desktop url!
+  
   $mobile_url  = parse_url(variable_get('mobile_tools_mobile_url', mobile_tools_create_mobile_url($base_url)));
   $mobile_url['host'] = mobile_tools_prepare_url($mobile_url['host']);
 
@@ -655,10 +668,9 @@ function _mobile_tools_site_detection() {
   }
   if (!array_key_exists('path', $mobile_url)) {
     $mobile_url['path'] = '';
-  }
-
+  }  
+   
   $server_name = mobile_tools_prepare_url($_SERVER['SERVER_NAME']);
-  
   // Check domain first
   if ($mobile_url['host'] == $server_name && $desktop_url['host'] != $server_name) { 
       
