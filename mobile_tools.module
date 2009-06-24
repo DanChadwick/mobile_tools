@@ -1,4 +1,4 @@
-<?php
+  <?php
 // $Id$
 /**
  * @file
@@ -130,13 +130,19 @@ function mobile_tools_detection_boot() {
   global $base_url;
   $handling = variable_get('mobile_tools_handling', 0); 
   if ($_SESSION['mobile-tools-mobile-device']['type'] != $_SESSION['mobile-tools-site-type']) {
+
     switch ($handling) {
       case 'redirect': //redirect
         $destination = ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile') ? variable_get('mobile_tools_mobile_url', mobile_tools_create_mobile_url($base_url)) : variable_get('mobile_tools_desktop_url', $base_url);
-        mobile_tools_goto($destination);
+       mobile_tools_goto($destination);
       break;
     }
   }
+}
+
+function mobile_tools_init(){
+
+
 }
 
 /**
@@ -268,15 +274,21 @@ function mobile_tools_detection_configuration_form() {
     '#default_value' => variable_get('mobile_tools_times', 0),
     '#description' => t('How many times do you want to show a notification (0 means always).'),
   );
+  $form['mobile_tools_notification']['mobile_tools_notification_option'] = array(
+    '#type' => 'radios',
+    '#title' => t('When to display the notifications'), 
+    '#options' => array(t('Always'), t('Only when a mobile user looks at the desktop site, or a desktop users looks at the mobile site')),
+    '#default_value' => 0,
+  );
   $form['mobile_tools_notification']['mobile_notification'] = array(
     '#type' => 'textarea',
     '#rows' => 2,
-    '#title' => t('To mobile users'),
+    '#title' => t('On the desktop site'),
     '#default_value' => variable_get('mobile_notification', MOBILE_NOTIFICATION),
   );
   $form['mobile_tools_notification']['desktop_notification'] = array(
     '#type' => 'textarea',
-    '#title' => t('To desktop users'),
+    '#title' => t('On the mobile site'),
     '#rows' => 2,
     '#default_value' => variable_get('desktop_notification', DESKTOP_NOTIFICATION),
     '#suffix' => mobile_tools_notification_help(),
@@ -737,9 +749,9 @@ function mobile_tools_token_values($type, $object = NULL) {
       $tokens['desktop-site-link'] = l('desktop site', $desktop_url);
       if (mobile_tools_is_mobile_site() == 'mobile') {
          $tokens['mobile'] = t('Mobile');
-         $tokens['desktop'] = l('Destkop', ''); 
+         $tokens['desktop'] = l('Destkop', $desktop_url); 
       } else {
-         $tokens['mobile'] = l('Mobile', 'Mobile');
+         $tokens['mobile'] = l('Mobile', $mobile_url);
          $tokens['desktop'] = t('Desktop');
       }      
       return $tokens;   
@@ -1013,4 +1025,12 @@ function mobile_tools_goto($path = '', $query = NULL, $fragment = NULL, $http_re
   // daemon. In some cases this can go wrong, so we make sure none
   // of the code below the drupal_goto() call gets executed when we redirect.
   exit();
+}
+
+function mobile_tools_compatibility() {
+  return array (
+    'themekey',
+    'domain',
+    'image_fupload',
+  );
 }
