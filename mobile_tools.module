@@ -183,11 +183,16 @@ function mobile_tools_themes_init() {
 function mobile_tools_roles_init() {
   global $user;
   $roles = $user->roles;
-  foreach ($roles as $key => $value) {
-    $role = mobile_tools_roles_info(array('id' => $key));
-    if ($role->type == 'desktop' && $role->has_sibling == 1 && $_SESSION['mobile-tools-site-type'] == 'mobile' || ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && variable_get('mobile_tools_handling', FALSE) == 'theme-switch')) {
-      unset($user->roles[$key]);
-      $user->roles[$role->sibling['id']] = $role->sibling['name'];  
+  
+  //count the number of mobile roles... must be bigger then 1
+  $item = db_fetch_object(db_query("SELECT COUNT(*) as count FROM {mobile_tools_roles_relations}"));
+  if ($item->count > 0) {
+    foreach ($roles as $key => $value) {
+      $role = mobile_tools_roles_info(array('id' => $key));
+      if ($role->type == 'desktop' && $role->has_sibling == 1 && $_SESSION['mobile-tools-site-type'] == 'mobile' || ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && variable_get('mobile_tools_handling', FALSE) == 'theme-switch')) {
+        unset($user->roles[$key]);
+        $user->roles[$role->sibling['id']] = $role->sibling['name'];  
+      }
     }
   }
 }
@@ -232,7 +237,7 @@ function mobile_tools_detection_configuration_form() {
   
   $form['mobile_tools_configuration']['mobile_tools_enable_redirect'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable device detection and further processing (dedirection / notification / theme switching)'),
+    '#title' => t('Enable device detection and further processing (redirection / notification / theme switching)'),
     '#description' => t('Enable or disable the notification and redirection functionality!'),
     '#default_value' => variable_get('mobile_tools_enable_redirect', 0),
   );
@@ -241,7 +246,7 @@ function mobile_tools_detection_configuration_form() {
     '#title' => t('Select the appropriate method'),
     '#default_value' => variable_get('mobile_tools_handling', 'notification'),
     '#options' =>   mobile_tools_detection_configuration_options('device handling'),
-    '#description' => t('Choose one of these methodes! Automatic redirection: mobile users will be send to the mobile site, while desktop users will be send to the desktop site; Display a notification: a block message will be generated when a mobile user visits your desktop site . the message can contain the link to your mobile site; Switch the theme: you can select in the Mobile theme section which theme to be loaded for a mobile user.'),
+    '#description' => 'Choose one of these methodes!',
   );
   
   $form['mobile_tools_configuration']['mobile_tools_mobile_url'] = array(
