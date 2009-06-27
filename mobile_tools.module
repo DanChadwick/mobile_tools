@@ -117,7 +117,7 @@ function mobile_tools_boot() {
 
   if ($_SESSION['mobile-tools-site-type'] == 'mobile' || (variable_get('mobile_tools_handling', ''  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile')) {
    
-    variable_set('default_nodes_main', variable_get('default_nodes_main_mobile', 5));
+    variable_set('default_main_nodes', variable_get('default_nodes_main_mobile', 5));
   } 
   else {
     variable_set('default_main_nodes', variable_get('default_nodes_main_original', 10));
