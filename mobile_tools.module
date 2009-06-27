@@ -114,7 +114,7 @@ function mobile_tools_boot() {
   if (variable_get('mobile_tools_enable_roles', 0) ) {
     mobile_tools_roles_init();  // assigns the user the mobile role
   }
-   drupal_set_message($_SESSION['mobile-tools-site-type']);
+
   if ($_SESSION['mobile-tools-site-type'] == 'mobile' || (variable_get('mobile_tools_handling', ''  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile')) {
    
     variable_set('default_nodes_main', variable_get('default_nodes_main_mobile', 5));
