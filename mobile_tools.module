@@ -164,7 +164,7 @@ function _mobile_tools_message() {
  */ 
 function mobile_tools_themes_init() {
   global $conf;
-  if ($_SESSION['mobile-tools-site-type'] == 'mobile' || (variable_get('mobile_tools_handling', ''  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
+  if ( ($_SESSION['mobile-tools-site-type'] == 'mobile' &&  variable_get('mobile_tools_handling', ''  ) != 'theme-switch') || (variable_get('mobile_tools_handling', ''  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
     global $conf;
     $group = $_SESSION['mobile-tools-mobile-device']['group'];
     $type = $_SESSION['mobile-tools-mobile-device']['type'];
