@@ -518,7 +518,7 @@ function mobile_tools_themes_configuration_form() {
 
    // for each group, checkbox and dropdown
    // Mobile
-   $mobile_groups = module_invoke(variable_get('mobile-tools-device-detection', 'mobile_tools'), 'device_groups');   
+   $mobile_groups = module_invoke(variable_get('mobile-tools-device-detection', 'mobile_tools'), 'device_groups');
    $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
    foreach ($mobile_groups as $group) {
       $form['mobile_tools_theme_configuration'][$mobile_detection_module . '_' . $group] = array(
@@ -527,13 +527,13 @@ function mobile_tools_themes_configuration_form() {
         '#collapsible' => TRUE,
         
       );
-      $form['mobile_tools_theme_configuration']['mobile_tools_' . $group][$mobile_detection_module . '_' . $group . '_enable'] = array (
+      $form['mobile_tools_theme_configuration'][$mobile_detection_module . '_' . $group][$mobile_detection_module . '_' . $group . '_enable'] = array (
         '#type' => 'checkbox',
         '#title' => t('Enable filter for this device group'),
         '#default_value' => variable_get($mobile_detection_module . '_' . $group . '_enable', ''),
         '#description' => t('Choose a theme for this device group'),
       );
-       $form['mobile_tools_theme_configuration']['mobile_tools_' . $group][$mobile_detection_module . '_' . $group . '_theme'] = array(
+       $form['mobile_tools_theme_configuration'][$mobile_detection_module . '_' . $group][$mobile_detection_module . '_' . $group . '_theme'] = array(
          '#type' => 'select',
          '#title' => 'Mobile theme',
          '#default_value' => variable_get($mobile_detection_module . '_' . $group . '_theme', FALSE),
