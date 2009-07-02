@@ -87,8 +87,7 @@ function mobile_tools_exit() {
  *  Implementation of hook_boot().
  */ 
 function mobile_tools_boot() {
-  
-   cache_clear_all(NULL, 'cache_page', TRUE);
+  cache_clear_all(NULL, 'cache_page', TRUE);
   
   global $conf;
   global $user;
@@ -518,6 +517,7 @@ function mobile_tools_themes_configuration_form() {
 
    // for each group, checkbox and dropdown
    // Mobile
+
    $mobile_groups = module_invoke(variable_get('mobile-tools-device-detection', 'mobile_tools'), 'device_groups');
    $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
    foreach ($mobile_groups as $group) {
@@ -578,17 +578,30 @@ function mobile_tools_site_type_options() {
 function _mobile_tools_external($type) {
   switch ($type) {
     case 'device-detection':
-      $modules = module_implements('is_mobile_device');
+      $modules = mobile_tools_get_module_names(module_implements('is_mobile_device'));
+      mobile_tools_get_module_names($modules);
     break;
     case 'site-type-detection':
-      $modules = module_implements('is_mobile_site');
+      $modules = mobile_tools_get_module_names(module_implements('is_mobile_site'));
     break;
     case 'device-capability':
-      $modules = module_implements('devicecapability');
+      $modules = mobile_tools_get_module_names(module_implements('devicecapability'));
     break;
   }  
-  return array_combine($modules, $modules);
+  return $modules;
 } 
+
+function mobile_tools_get_module_names($array) {
+  $output = array();
+  foreach ($array as $module) {
+    $query = "SELECT * FROM {system} WHERE type = '%s' AND name = '%s'";
+    $result = db_query($query, 'module', $module);
+    $item = db_fetch_object($result);
+    $info = unserialize($item->info);
+    $output[$module] = $info['name']; 
+  }
+  return $output;
+}
 /**
  *  Implementation of the user_load function to assure that the right role is being assigned to the user.
  *  This is the same actions as in the hook_init() method 
