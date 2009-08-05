@@ -140,7 +140,7 @@ function mobile_tools_detection_boot() {
     $_SESSION['mobile_tools_nomobile'] = FALSE;
  }
  
-  if ($_SESSION['siruna_nomobile'] == FALSE && variable_get('siruna_enable_redirect', FALSE)) {
+  if ($_SESSION['mobile_tools_nomobile'] == FALSE && variable_get('siruna_enable_redirect', FALSE)) {
     if ($device_detection['type'] == 'mobile' && $site_detection == 'desktop') {
           $destination = variable_get('siruna_mobile_url', '');
           drupal_goto($destination);
