@@ -68,11 +68,11 @@ function mobile_tools_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 0,
   );
-  $items['siruna/gomobile'] = array(
+  $items['mobile_tools/gomobile'] = array(
     'title' => 'Siruna',
     'description' => t('Redirect to the mobile site.'),
-    'access arguments' => array('configure Siruna'),
-    'page callback' => 'siruna_redirect',
+    'access arguments' => array('configure Mobile Tools'),
+    'page callback' => 'mobile_tools_redirect',
     'type' => MENU_NORMAL_ITEM,
   ); 
   return $items;
