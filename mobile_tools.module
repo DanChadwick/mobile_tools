@@ -69,7 +69,7 @@ function mobile_tools_menu() {
     'weight' => 0,
   );
   $items['mobile_tools/gomobile'] = array(
-    'title' => 'Siruna',
+    'title' => 'Mobile',
     'description' => t('Redirect to the mobile site.'),
     'access arguments' => array('configure Mobile Tools'),
     'page callback' => 'mobile_tools_redirect',
@@ -100,6 +100,7 @@ function mobile_tools_boot() {
   if ($site_detection != 'mobile_tools') {
   drupal_load('module', $site_detection);
   }
+  
   $_SESSION['mobile-tools-mobile-device'] = module_invoke($device_detection, 'is_mobile_device');
   $_SESSION['mobile-tools-site-type'] = module_invoke($site_detection, 'is_mobile_site');
 
@@ -140,9 +141,9 @@ function mobile_tools_detection_boot() {
     $_SESSION['mobile_tools_nomobile'] = FALSE;
  }
  
-  if ($_SESSION['mobile_tools_nomobile'] == FALSE && variable_get('siruna_enable_redirect', FALSE)) {
+  if ($_SESSION['mobile_tools_nomobile'] == FALSE && variable_get('mobile_tools_enable_redirect', FALSE)) {
     if ($device_detection['type'] == 'mobile' && $site_detection == 'desktop') {
-          $destination = variable_get('siruna_mobile_url', '');
+          $destination = variable_get('mobile_tools_mobile_url', '');
           drupal_goto($destination);
     }
   }    
@@ -189,9 +190,10 @@ function mobile_tools_themes_init() {
     $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
     if (variable_get($mobile_detection_module . '_' . $group . '_enable', '') == 1) {
       $conf['theme_default'] = variable_get($mobile_detection_module . '_' . $group . '_theme', $conf['theme_default']);
-      
+     
     } else {
       $conf['theme_default'] = variable_get('mobile_tools_theme_name', $conf['theme_default']);
+      
     }
   }
 }
