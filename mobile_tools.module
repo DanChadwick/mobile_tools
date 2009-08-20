@@ -1,4 +1,4 @@
-<?php
+ <?php
 // $Id$
 /**
  * @file
@@ -86,7 +86,7 @@ function mobile_tools_exit() {
  *  Implementation of hook_boot().
  */ 
 function mobile_tools_boot() {
-  cache_clear_all(NULL, 'cache_page', TRUE);
+  
   
   global $conf;
   global $user;
@@ -142,7 +142,7 @@ function mobile_tools_detection_boot() {
  }
  
   if ($_SESSION['mobile_tools_nomobile'] == FALSE && variable_get('mobile_tools_enable_redirect', FALSE)) {
-    if ($device_detection['type'] == 'mobile' && $site_detection == 'desktop') {
+    if ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && $_SESSION['mobile-tools-site-type'] == 'desktop') {
           $destination = variable_get('mobile_tools_mobile_url', '');
           drupal_goto($destination);
     }
@@ -183,6 +183,7 @@ function _mobile_tools_message() {
  */ 
 function mobile_tools_themes_init() {
   global $conf;
+  cache_clear_all(NULL, 'cache_page', TRUE); 
   if ( ($_SESSION['mobile-tools-site-type'] == 'mobile' &&  variable_get('mobile_tools_handling', ''  ) != 'theme-switch') || (variable_get('mobile_tools_handling', ''  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
     global $conf;
     $group = $_SESSION['mobile-tools-mobile-device']['group'];
