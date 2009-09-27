@@ -1,6 +1,9 @@
 <?php
 
-
+/**
+ * @file
+ *  Mobile Tools installation 
+ */ 
 function mobile_tools_install() {
   drupal_install_schema('mobile_tools');
 }
@@ -13,6 +16,8 @@ function mobile_tools_uninstall() {
   while($item = db_fetch_object($result)) {
     db_query("DELETE FROM {role} WHERE rid = %d", $item->mrid);
   }
+  variable_del('default_main_nodes');
+  variable_del('default_main_nodes_original');
   drupal_uninstall_schema('mobile_tools'); 
 }
 
