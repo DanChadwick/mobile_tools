@@ -110,10 +110,10 @@ function mobile_tools_boot() {
     // do the device detection, redirect or generate a notification
   }
   if (variable_get('mobile_tools_handling', 0) == 'theme-switch') {
-    mobile_tools_themes_init(); // changes the theme
+    mobile_tools_themes_boot(); // changes the theme
   }
   if (variable_get('mobile_tools_enable_roles', 0) ) {
-    mobile_tools_roles_init();  // assigns the user the mobile role
+    mobile_tools_roles_boot();  // assigns the user the mobile role
   }
   if ($_SESSION['mobile-tools-site-type'] == 'mobile' || (variable_get('mobile_tools_handling', ''  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile')) {  
     variable_set('default_main_nodes', variable_get('default_nodes_main_mobile', 5));
@@ -384,24 +384,33 @@ function mobile_tools_site_type_options() {
 function mobile_tools_detection_boot() {
  global $base_url;
  $handling = variable_get('mobile_tools_handling', 0); 
+ 
 /**
  * Checking the possible arguments
  */ 
  if (isset($_GET['nomobile'])) {
    if ($_GET['nomobile'] == 'true') {
-      $_SESSION['mobile_tools_nomobile'] = TRUE;
-  
+     $redirect = 'FALSE';
+      setCookie('mt_redirect', 'FALSE', time()+3600*24*30, '/'); 
     } if(!isset($_GET['nomobile']) == 'false') {
-      $_SESSION['mobile_tools_nomobile'] = FALSE;
+     $redirect = 'TRUE';
+      setCookie('mt_redirect', 'TRUE', time()+3600*24*30, '/');
     }
  } else {
-    $_SESSION['mobile_tools_nomobile'] = FALSE;
+    // keep cookie if set, else set to true (default)
+    if (!isset($_COOKIE['mt_redirect'])) {
+      $redirect = 'TRUE';
+      setCookie('mt_redirect', 'TRUE', time()+3600*24*30, '/' );
+    } else {
+      $redirect = $_COOKIE['mt_redirect'];
+    }
+     //setCookie('redirect mobile', 'TRUE', time()+3600*24*30, '/');
  }
-
+ 
 /**
  *Redirections
  */ 
- if ($handling == 'redirect') {
+ if ($handling == 'redirect' && $redirect == 'TRUE') {
    if ($_SESSION['mobile_tools_nomobile'] == FALSE) {
      if ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && $_SESSION['mobile-tools-site-type'] == 'desktop') {
           $destination = variable_get('mobile_tools_mobile_url', '');
@@ -564,7 +573,7 @@ function _mobile_tools_message() {
  * Being called in the hook_init() implementation
  * This function is in charge of changing to the mobile theme 
  */ 
-function mobile_tools_themes_init() {
+function mobile_tools_themes_boot() {
   global $conf;
   cache_clear_all(NULL, 'cache_page', TRUE); 
   if ( ($_SESSION['mobile-tools-site-type'] == 'mobile' &&  variable_get('mobile_tools_handling', ''  ) != 'theme-switch') || (variable_get('mobile_tools_handling', ''  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {

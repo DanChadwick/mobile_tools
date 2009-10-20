@@ -3,7 +3,7 @@
  * Being called in the hook_init() implementation
  * This function is in charge of changing the user role 
  */ 
-function mobile_tools_roles_init() {
+function mobile_tools_roles_boot() {
   global $user;
   $roles = $user->roles;
   
