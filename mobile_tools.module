@@ -81,7 +81,7 @@ function mobile_tools_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
   );
-  $items['mobile_tools/gomobile'] = array(
+  $items['gomobile'] = array(
     'title' => 'Mobile',
     'description' => t('Redirect to the mobile site.'),
     'access arguments' => array('configure Mobile Tools'),
@@ -528,7 +528,6 @@ function mobile_tools_block($op = 'list',  $delta = 0, $edit = array()) {
         return $blocks;
       break;
     case 'view':
-        $block['title'] = '';
         $block['content'] = _mobile_tools_message();
         return $block;        
       break;
