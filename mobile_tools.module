@@ -45,9 +45,9 @@ function mobile_tools_menu() {
   $items['admin/settings/mobile-tools'] = array(
     'title' => 'Mobile Tools',
     'description' => t('Configure the detection of the mobile client and the appropriate actions.'),
-     'access arguments' => array('configure Mobile Tools'),
+    'access arguments' => array('configure Mobile Tools'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mobile_tools_detection_configuration_form'),
+    'page arguments' => array('mobile_tools_configuration_form'),
     'type' => MENU_NORMAL_ITEM,
   );  
   $items['admin/settings/mobile-tools/device-detection'] = array(
@@ -105,17 +105,15 @@ function mobile_tools_boot() {
   global $conf, $user, $base_url;
   $_SESSION['mobile-tools-mobile-device'] = mobile_tools_is_mobile_device();
   $_SESSION['mobile-tools-site-type'] = mobile_tools_is_mobile_site();
-  if (variable_get('mobile_tools_mobile_url', mobile_tools_create_mobile_url($base_url)) != variable_get('mobile_tools_desktop_url', $base_url)) {   
-    mobile_tools_detection_boot();
-    // do the device detection, redirect or generate a notification
-  }
-  if (variable_get('mobile_tools_handling', 0) == 'theme-switch') {
-    mobile_tools_themes_boot(); // changes the theme
-  }
+  // First redirect if needed
+  mobile_tools_redirection_boot();  
+  // Secondly do the theme switch
+  $theme_switched = mobile_tools_themes_boot(); 
+  
   if (variable_get('mobile_tools_enable_roles', 0) ) {
     mobile_tools_roles_boot();  // assigns the user the mobile role
   }
-  if ($_SESSION['mobile-tools-site-type'] == 'mobile' || (variable_get('mobile_tools_handling', ''  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile')) {  
+  if ($_SESSION['mobile-tools-site-type'] == 'mobile' || $theme_switched) {  
     variable_set('default_main_nodes', variable_get('default_nodes_main_mobile', 5));
   } else {
     variable_set('default_main_nodes', variable_get('default_nodes_main_original', 10));
@@ -131,65 +129,58 @@ function mobile_tools_boot() {
  * @return
  *   The configuration form   
  */ 
-function mobile_tools_detection_configuration_form() {
+function mobile_tools_configuration_form() {
   global $base_url;
   $form['mobile_tools_configuration'] = array(
     '#type' => 'fieldset',
-    '#title' => 'Configuration',
-    '#description' => 'Mobile users: choose between user redirection or user notification',
+    '#title' => 'Genearl configuration',
+    '#description' => 'Enter the mobile and desktop url for your site. If both urls are equal there will be no redirection, but only theme switching. Go to "theme switching" to configure the theme',
     '#collapsible' => TRUE,
   );
   
-  $form['mobile_tools_configuration']['mobile_tools_handling'] = array(
-    '#type' => 'radios',
-    '#title' => t('Select the appropriate method'),
-    '#default_value' => variable_get('mobile_tools_handling', 'notification'),
-    '#options' =>   mobile_tools_detection_configuration_options('device handling'),
-    '#description' => 'Choose one of these methodes!',
-  );
-  
- $form['mobile_tools_redirection'] = array (
-    '#type' => 'fieldset',
-    '#title' => t('Redirection options'),
-    '#description' => 'Fill in your mobile and desktop url. Recommended practices are to use m.* or *.mobi',
-    '#collapsed' => TRUE,
-    '#collapsible' => TRUE,  
-  );
-  $form['mobile_tools_redirection']['mobile_tools_mobile_url'] = array(
+  $form['mobile_tools_configuration']['mobile_tools_mobile_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Mobile URL'),
+    '#required' => TRUE,
     '#description' => t('Give the name of your mobile site. It is recommended to use the convention of m.domain .com or www.domain.mobi'),
     '#default_value' => variable_get('mobile_tools_mobile_url', mobile_tools_create_mobile_url($base_url)),
   );
-  $form['mobile_tools_redirection']['mobile_tools_desktop_url'] = array(
+  $form['mobile_tools_configuration']['mobile_tools_desktop_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Desktop URL'),
+    '#required' => TRUE,
     '#description' => t('Give the name of your regular website.'),
     '#collapsible' => TRUE,
     '#default_value' => variable_get('mobile_tools_desktop_url', $base_url)
   );
+  
+
+  
+ $form['mobile_tools_redirection'] = array (
+    '#type' => 'fieldset',
+    '#title' => t('Redirection options'),
+    '#collapsible' => TRUE,  
+  );
+  
+  $form['mobile_tools_redirection']['mobile_tools_redirect'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable automatic redirection of the mobile user'),
+    '#default_value' => variable_get('mobile_tools_redirect', FALSE),
+    '#description' => 'Mobile visitors will be redirected to the mobile site. The module support 
+    mobile users that want to see the desktop site. In order to return mobile users to the desktop site, use the ?nomobil=true argument. The module
+    will set a cookie that remembers that the user does not want to be redirected. To undo, send the user to /gomobile. The module will redirect 
+    the user to the mobile site and reset the cookie!',
+  );
+  
   $form['mobile_tools_notification'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Notification options'),
+    '#title' => t('Mobile Tools block message options'),
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
-    '#description' => t('Choose a text to be displayed to the visitors of your site and how many times the user gets the message. This will be used if you checked the "Display a notification" checkbox in the above configuration.'),
+    '#description' => t('You can create a block with a different message on the mobile site then the desktop site. This can be for example used to create a link back to the deskop or mobile site (e.g. view Mobile | Desktop)'),
   );
   
 
-  $form['mobile_tools_notification']['mobile_tools_times'] = array(
-    '#type' => 'textfield',
-    '#title' => t('number of impressions'),
-    '#cols' => '2',
-    '#default_value' => variable_get('mobile_tools_times', 0),
-    '#description' => t('How many times do you want to show a notification (0 means always).'),
-  );
-  $form['mobile_tools_notification']['mobile_tools_notification_options'] = array(
-    '#type' => 'radios',
-    '#title' => t('When to display the notifications'), 
-    '#options' => array('desktop-mobile' => t('To both desktop and mobile users'), 'mobile' => t('Only to mobile users')),
-    '#default_value' => 'mobile',
-  );
   $form['mobile_tools_notification']['mobile_notification'] = array(
     '#type' => 'textarea',
     '#rows' => 2,
@@ -345,13 +336,13 @@ function mobile_tools_themes_configuration_form() {
 /**
  * Helper function to return the configuration options
  */ 
-function mobile_tools_detection_configuration_options($configuration) {
+function mobile_tools_configuration_options($configuration) {
   switch ($configuration) {
     case 'device handling':
       $options = array(
         'nothing' => t('Do nothing, just provide the $_SESSION[\'mobile_device\'] variable'), 
         'redirect' => t('Automatic redirection to mobile or desktop site'), 
-        'notification' => t('Display a block notification with link to mobile site'),
+      //  'notification' => t('Display a block notification with link to mobile site'),
       //  'theme-switch' => t('Switch the theme when a mobile user visits the site (only 1 url for both mobile and desktop url). Enable and configure the mobile theme !here', array('!here' => l('here', 'admin/settings/mobile-tools/themes'))),
       );
     break;
@@ -381,55 +372,51 @@ function mobile_tools_site_type_options() {
  * Being called in the hook_boot() implementation
  * This function is in charge of device detection, redirection or displaying a notification 
  */ 
-function mobile_tools_detection_boot() {
+function mobile_tools_redirection_boot() {
  global $base_url;
- $handling = variable_get('mobile_tools_handling', 0); 
- 
-/**
- * Checking the possible arguments
- */ 
- if (isset($_GET['nomobile'])) {
-   if ($_GET['nomobile'] == 'true') {
-     $redirect = 'FALSE';
-      setCookie('mt_redirect', 'FALSE', time()+3600*24*30, '/'); 
-    } if(!isset($_GET['nomobile']) == 'false') {
-     $redirect = 'TRUE';
-      setCookie('mt_redirect', 'TRUE', time()+3600*24*30, '/');
-    }
- } else {
-    // keep cookie if set, else set to true (default)
-    if (!isset($_COOKIE['mt_redirect'])) {
-      $redirect = 'TRUE';
-      setCookie('mt_redirect', 'TRUE', time()+3600*24*30, '/' );
-    } else {
-      $redirect = $_COOKIE['mt_redirect'];
-    }
-     //setCookie('redirect mobile', 'TRUE', time()+3600*24*30, '/');
- }
- 
-/**
- *Redirections
- */ 
- if ($handling == 'redirect' && $redirect == 'TRUE') {
-   if ($_SESSION['mobile_tools_nomobile'] == FALSE) {
-     if ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && $_SESSION['mobile-tools-site-type'] == 'desktop') {
-          $destination = variable_get('mobile_tools_mobile_url', '');
-          mobile_tools_goto($destination);
-     }
-    }   
-    // The case where a mobile user is accessing the desktop site
-    if ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && $_SESSION['mobile-tools-site-type'] == 'desktop') {
-      if (($_SESSION['mobile_tools_nomobile'] == TRUE && variable_get('mobile_tools_enable_nomobile', FALSE) == FALSE) || ($_SESSION['mobile_tools_nomobile'] == FALSE && variable_get('mobile_tools_enable_nomobile', FALSE) == TRUE )) {
-         $destination =  variable_get('mobile_tools_mobile_url', mobile_tools_create_mobile_url($base_url));
-         mobile_tools_goto($destination);
-      }  
-    }
-    // The case where a desktop user is accessing the mobile site
-    if ($_SESSION['mobile-tools-mobile-device']['type'] == 'desktop' && $_SESSION['mobile-tools-site-type'] == 'mobile') {
-      if (($_SESSION['mobile_tools_nomobile'] == TRUE && variable_get('mobile_tools_enable_nomobile', FALSE) == FALSE) || ($_SESSION['mobile_tools_nomobile'] == FALSE && variable_get('mobile_tools_enable_nomobile', FALSE) == TRUE )) {
-         $destination =  variable_get('mobile_tools_destkop_url', $base_url);
-         mobile_tools_goto($destination);
-      } 
+  
+ //only consider redirectoin if the mobile url and the destkop url are different
+ if (variable_get('mobile_tools_mobile_url', '') != variable_get('mobile_tools_desktop_url', '')) {
+   // Checking the possible arguments
+   if (isset($_GET['nomobile'])) {
+     if ($_GET['nomobile'] == 'true') {
+       $redirect = 'FALSE';
+        setCookie('mt_redirect', 'FALSE', time()+3600*24*30, '/'); 
+      } if(!isset($_GET['nomobile']) == 'false') {
+       $redirect = 'TRUE';
+        setCookie('mt_redirect', 'TRUE', time()+3600*24*30, '/');
+      }
+   } else {
+      // keep cookie if set, else set to true (default)
+      if (!isset($_COOKIE['mt_redirect'])) {
+        $redirect = 'TRUE';
+        setCookie('mt_redirect', 'TRUE', time()+3600*24*30, '/' );
+      } else {
+        $redirect = $_COOKIE['mt_redirect'];
+      }
+   }
+  // Redirections 
+   if (variable_get('mobile_tools_redirect', FALSE) && $redirect == 'TRUE') {
+     if ($_SESSION['mobile_tools_nomobile'] == FALSE) {
+       if ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && $_SESSION['mobile-tools-site-type'] == 'desktop') {
+            $destination = variable_get('mobile_tools_mobile_url', '');
+            mobile_tools_goto($destination);
+       }
+      }   
+      // The case where a mobile user is accessing the desktop site
+      if ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && $_SESSION['mobile-tools-site-type'] == 'desktop') {
+        if (($_SESSION['mobile_tools_nomobile'] == TRUE && variable_get('mobile_tools_enable_nomobile', FALSE) == FALSE) || ($_SESSION['mobile_tools_nomobile'] == FALSE && variable_get('mobile_tools_enable_nomobile', FALSE) == TRUE )) {
+           $destination =  variable_get('mobile_tools_mobile_url', mobile_tools_create_mobile_url($base_url));
+           mobile_tools_goto($destination);
+        }  
+      }
+      // The case where a desktop user is accessing the mobile site
+      if ($_SESSION['mobile-tools-mobile-device']['type'] == 'desktop' && $_SESSION['mobile-tools-site-type'] == 'mobile') {
+        if (($_SESSION['mobile_tools_nomobile'] == TRUE && variable_get('mobile_tools_enable_nomobile', FALSE) == FALSE) || ($_SESSION['mobile_tools_nomobile'] == FALSE && variable_get('mobile_tools_enable_nomobile', FALSE) == TRUE )) {
+           $destination =  variable_get('mobile_tools_destkop_url', $base_url);
+           mobile_tools_goto($destination);
+        } 
+      }
     }
   }
 }
@@ -536,22 +523,15 @@ function _mobile_tools_device_groups() {
 function mobile_tools_block($op = 'list',  $delta = 0, $edit = array()) {
    switch ($op) {
     case 'list':
-       if (variable_get('mobile_tools_handling', 'notification') == 'notification') {
-        $blocks[0]['info'] = t('Mobile Tools block notification');
+        $blocks[0]['info'] = t('Mobile Tools message block');
         $blocks[0]['cache'] = BLOCK_NO_CACHE;
         return $blocks;
-       }
-    break;
+      break;
     case 'view':
-      if (variable_get('mobile_tools_handling', 'notification') == 'notification' && ($_SESSION['mobile-tools-mobile-device']['type']  !=  $_SESSION['mobile-tools-site-type'])) {
-        if ((variable_get('mobile_tools_notification_options', '') == 'mobile' && $_SESSION['mobile-tools-mobile-device']['type'] == 'mobile') || variable_get('mobile_tools_notification_options','') == 'desktop-mobile') {
-          $block['title'] = '';
-          $block['content'] = _mobile_tools_message();
-          return $block;
-        } 
-        
-      }
-    break;
+        $block['title'] = '';
+        $block['content'] = _mobile_tools_message();
+        return $block;        
+      break;
    }
 } 
 
@@ -576,19 +556,20 @@ function _mobile_tools_message() {
 function mobile_tools_themes_boot() {
   global $conf;
   cache_clear_all(NULL, 'cache_page', TRUE); 
-  if ( ($_SESSION['mobile-tools-site-type'] == 'mobile' &&  variable_get('mobile_tools_handling', ''  ) != 'theme-switch') || (variable_get('mobile_tools_handling', ''  ) == 'theme-switch' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
+  if ( ($_SESSION['mobile-tools-site-type'] == 'mobile' &&  variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-url') || (variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-device' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
     global $conf;
     $group = $_SESSION['mobile-tools-mobile-device']['group'];
     $type = $_SESSION['mobile-tools-mobile-device']['type'];
     $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
     if (variable_get($mobile_detection_module . '_' . $group . '_enable', '') == 1) {
       $conf['theme_default'] = variable_get($mobile_detection_module . '_' . $group . '_theme', $conf['theme_default']);
-     
+      return true;
     } else {
       $conf['theme_default'] = variable_get('mobile_tools_theme_name', $conf['theme_default']);
-      
+      return true;
     }
   }
+  return false;
 }
 
 /**
