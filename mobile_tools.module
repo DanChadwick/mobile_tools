@@ -25,11 +25,10 @@
  * Implementation of hook_help($section).
  */ 
 function mobile_tools_help($path, $arg) {
-switch ($path) {
-    case 'admin/help#mobile_tools':
-      $output .= '<p>'. t('The mobile tools module assembles a range of functionality helping out in making your Drupal site mobile. Visit the !documentation for more information') .'<p>';
-
-  }
+  switch ($path) {
+      case 'admin/help#mobile_tools':
+        $output .= '<p>'. t('The mobile tools module assembles a range of functionality helping out in making your Drupal site mobile. Visit the !documentation for more information') .'<p>';
+    }
   return $output;
 }
 /**
@@ -154,8 +153,6 @@ function mobile_tools_configuration_form() {
     '#default_value' => variable_get('mobile_tools_desktop_url', $base_url)
   );
   
-
-  
  $form['mobile_tools_redirection'] = array (
     '#type' => 'fieldset',
     '#title' => t('Redirection options'),
@@ -179,17 +176,16 @@ function mobile_tools_configuration_form() {
     '#collapsible' => TRUE,
     '#description' => t('You can create a block with a different message on the mobile site then the desktop site. This can be for example used to create a link back to the deskop or mobile site (e.g. view Mobile | Desktop)'),
   );
-  
 
   $form['mobile_tools_notification']['mobile_notification'] = array(
     '#type' => 'textarea',
     '#rows' => 2,
-    '#title' => t('On the desktop site'),
+    '#title' => t('On the Mobile site'),
     '#default_value' => variable_get('mobile_notification', MOBILE_NOTIFICATION),
   );
   $form['mobile_tools_notification']['desktop_notification'] = array(
     '#type' => 'textarea',
-    '#title' => t('On the mobile site'),
+    '#title' => t('On the desktops site'),
     '#rows' => 2,
     '#default_value' => variable_get('desktop_notification', DESKTOP_NOTIFICATION),
   ); 
@@ -374,16 +370,15 @@ function mobile_tools_site_type_options() {
  */ 
 function mobile_tools_redirection_boot() {
  global $base_url;
-  
  //only consider redirectoin if the mobile url and the destkop url are different
  if (variable_get('mobile_tools_mobile_url', '') != variable_get('mobile_tools_desktop_url', '')) {
    // Checking the possible arguments
    if (isset($_GET['nomobile'])) {
      if ($_GET['nomobile'] == 'true') {
-       $redirect = 'FALSE';
+        $redirect = 'FALSE';
         setCookie('mt_redirect', 'FALSE', time()+3600*24*30, '/'); 
-      } if(!isset($_GET['nomobile']) == 'false') {
-       $redirect = 'TRUE';
+      } if($_GET['nomobile'] == 'false') {
+        $redirect = 'TRUE';
         setCookie('mt_redirect', 'TRUE', time()+3600*24*30, '/');
       }
    } else {
@@ -394,28 +389,17 @@ function mobile_tools_redirection_boot() {
       } else {
         $redirect = $_COOKIE['mt_redirect'];
       }
-   }
-  // Redirections 
-   if (variable_get('mobile_tools_redirect', FALSE) && $redirect == 'TRUE') {
-     if ($_SESSION['mobile_tools_nomobile'] == FALSE) {
-       if ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && $_SESSION['mobile-tools-site-type'] == 'desktop') {
-            $destination = variable_get('mobile_tools_mobile_url', '');
-            mobile_tools_goto($destination);
-       }
-      }   
+    }
+    // Redirections 
+    if (variable_get('mobile_tools_redirect', FALSE) && $redirect == 'TRUE') {
       // The case where a mobile user is accessing the desktop site
       if ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && $_SESSION['mobile-tools-site-type'] == 'desktop') {
-        if (($_SESSION['mobile_tools_nomobile'] == TRUE && variable_get('mobile_tools_enable_nomobile', FALSE) == FALSE) || ($_SESSION['mobile_tools_nomobile'] == FALSE && variable_get('mobile_tools_enable_nomobile', FALSE) == TRUE )) {
-           $destination =  variable_get('mobile_tools_mobile_url', mobile_tools_create_mobile_url($base_url));
-           mobile_tools_goto($destination);
-        }  
-      }
-      // The case where a desktop user is accessing the mobile site
-      if ($_SESSION['mobile-tools-mobile-device']['type'] == 'desktop' && $_SESSION['mobile-tools-site-type'] == 'mobile') {
-        if (($_SESSION['mobile_tools_nomobile'] == TRUE && variable_get('mobile_tools_enable_nomobile', FALSE) == FALSE) || ($_SESSION['mobile_tools_nomobile'] == FALSE && variable_get('mobile_tools_enable_nomobile', FALSE) == TRUE )) {
-           $destination =  variable_get('mobile_tools_destkop_url', $base_url);
-           mobile_tools_goto($destination);
-        } 
+          $destination = variable_get('mobile_tools_mobile_url', '');
+          mobile_tools_goto($destination);
+      // The case where a desktop user is accessing the mobile site 
+      } else if ($_SESSION['mobile-tools-mobile-device']['type'] == 'desktop' && $_SESSION['mobile-tools-site-type'] == 'mobile') {
+         $destination =  variable_get('mobile_tools_destkop_url', $base_url);
+         mobile_tools_goto($destination);
       }
     }
   }
@@ -538,11 +522,21 @@ function mobile_tools_block($op = 'list',  $delta = 0, $edit = array()) {
  *  Helper function returning the configurable message for the notification
  */ 
 function _mobile_tools_message() {
-  if ($_SESSION['mobile-tools-mobile-device']['type']  == 'mobile' ) {
-   return variable_get('mobile_notification', MOBILE_NOTIFICATION);
-  } 
-  else {
-    return variable_get('desktop_notification', DESKTOP_NOTIFICATION);
+  if (variable_get('mobile_tools_mobile_url', '') != variable_get('mobile_tools_desktop_url', '')) {
+    if ($_SESSION['mobile-tools-site-type']  == 'mobile' ) {
+      return variable_get('mobile_notification', MOBILE_NOTIFICATION);
+    } 
+    else {
+      return variable_get('desktop_notification', DESKTOP_NOTIFICATION);
+    }
+  } else {
+   if ($_SESSION['mobile-tools-mobile-device']['type']  == 'mobile' ) {
+      return variable_get('mobile_notification', MOBILE_NOTIFICATION);
+    } 
+    else {
+      return variable_get('desktop_notification', DESKTOP_NOTIFICATION);
+    }
+  
   }
 }
 /****************************************
@@ -807,8 +801,7 @@ function mobile_tools_create_mobile_url($url) {
   else {
     return 'http://'.  implode('.', $url)  . $url_parsed['path'] .'/mobile';
   }
-
- }  
+}  
  
 
 
@@ -829,9 +822,9 @@ function mobile_tools_compatibility() {
  *  chosen option 
  */ 
 function mobile_tools_redirect() {
-  $_SESSION['mobile_tools_nomobile'] = FALSE;
-  drupal_goto(variable_get('mobile_tools_mobile_url', ''));
+  drupal_goto(variable_get('mobile_tools_mobile_url', ''), 'nomobile=true');
 }
+
 function mobile_tools_goto($path = '', $query = NULL, $fragment = NULL, $http_response_code = 302) {
 
   $url = $path;
