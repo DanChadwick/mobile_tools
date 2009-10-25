@@ -83,7 +83,7 @@ function mobile_tools_menu() {
   $items['gomobile'] = array(
     'title' => 'Mobile',
     'description' => t('Redirect to the mobile site.'),
-    'access arguments' => array('configure Mobile Tools'),
+    'access callback' => TRUE,
     'page callback' => 'mobile_tools_redirect',
     'type' => MENU_CALLBACK_ITEM,
   ); 
@@ -398,7 +398,7 @@ function mobile_tools_redirection_boot() {
           mobile_tools_goto($destination);
       // The case where a desktop user is accessing the mobile site 
       } else if ($_SESSION['mobile-tools-mobile-device']['type'] == 'desktop' && $_SESSION['mobile-tools-site-type'] == 'mobile') {
-         $destination =  variable_get('mobile_tools_destkop_url', $base_url);
+         $destination =  variable_get('mobile_tools_desktop_url', $base_url);
          mobile_tools_goto($destination);
       }
     }
@@ -535,8 +535,7 @@ function _mobile_tools_message() {
     } 
     else {
       return variable_get('desktop_notification', DESKTOP_NOTIFICATION);
-    }
-  
+    } 
   }
 }
 /****************************************
@@ -640,8 +639,9 @@ function mobile_tools_is_mobile_site() {
 
 function _mobile_tools_site_detection() {
   global $base_url;    
-    // first check if the url is a m.* or .mobi url!!
-  $server_domain_elements = explode('.', $_SERVER['SERVER_NAME']);
+   $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+    // first check if the url is a m.* or .mobi url. This is robuts
+  $server_domain_elements = explode('.', $host);
   if (count($server_domain_elements) > 0 ) {
     if ($server_domain_elements[0] == 'm') { // check for m.* domain
       return 'mobile';
@@ -651,10 +651,11 @@ function _mobile_tools_site_detection() {
     }
   }
   // If this doesn't return an answer, we will have to do a comparison of the mobile and desktop url!
-  $mobile_url  = parse_url(variable_get('mobile_tools_mobile_url', mobile_tools_create_mobile_url($base_url)));
+  $mobile = variable_get('mobile_tools_mobile_url', mobile_tools_create_mobile_url($base_url));
+  $mobile_url  = parse_url($mobile);
   $mobile_url['host'] = mobile_tools_prepare_url($mobile_url['host']);
-
-  $desktop_url = parse_url(variable_get('mobile_tools_desktop_url', $base_url));
+  $desktop = variable_get('mobile_tools_desktop_url', $base_url);
+  $desktop_url = parse_url($desktop);
   $desktop_url['host'] = mobile_tools_prepare_url($desktop_url['host']);
   
   if (!array_key_exists('path', $desktop_url)) {
@@ -666,28 +667,25 @@ function _mobile_tools_site_detection() {
    
   $server_name = mobile_tools_prepare_url($_SERVER['SERVER_NAME']);
   // Check domain first
-  if ($mobile_url['host'] == $server_name && $desktop_url['host'] != $server_name) { 
-      
+  if ($mobile_url['host'] == $server_name && $desktop_url['host'] != $server_name) {      
     return 'mobile';
   } 
   else if ($mobile_url['host'] != $server_name && $desktop_url['host'] == $server_name) {
     return 'desktop';
-  } else if ($mobile_url['host'] == $server_name && $desktop_url['host'] == $server_name) {
-    $significant = (strlen($mobile_url['path']) > strlen($desktop_url['path'])) ? 'mobile' : 'desktop'; //we check the most significatn url (with the longest path)
-    if (preg_match("|" . $desktop_url['path'] . "|", request_uri())) {
-      if (preg_match("|" . $mobile_url['path'] . "|", request_uri())) {
-        return $significant; // if both patterns match, return the significant
-      }
-      return 'desktop';
-    } 
-    else {
-
-      return 'mobile';
-    }
   } 
-  else {
-    return 'desktop'; 
+  
+  // find longest url
+  $longest_url = strlen($mobile) > strlen($desktop) ? $mobile : $desktop ;
+  $protocol = isset($_SERVER['HTTPS']) ? 'https://' : 'http://';
+  $uri = $protocol . $_SERVER['HTTP_HOST'] .    $_SERVER['REQUEST_URI'];
+  $pos = strpos($uri, preg_replace('{/$}', '', $longest_url));
+  if($pos === false) {
+    return $longest_url == $mobile ? 'destkop' : 'mobile';
+  } else {
+    return $longest_url == $mobile ? 'mobile' : 'desktop';
   }
+  
+ 
 }
 /**
  *  This function does some kind of normalisation of the urls when there is no subdomain available in the url
@@ -712,12 +710,7 @@ function mobile_tools_prepare_url($url) {
  */ 
 function mobile_tools_form_alter(&$form, $form_state, $form_id) {
   switch ($form_id) {
-    case 'system_theme_settings':
-      if (variable_get('mobile_tools_theme', FALSE) && arg(4) == variable_get('mobile_tools_theme_name', '')) {
-         drupal_set_message(t('This theme will be used by Siruna when your site is being transcoded. Configure this for a mobile device'));
-      }
-      break;
-    case 'user_admin_role':
+     case 'user_admin_role':
       $query = "SELECT COUNT(*) as count FROM {mobile_tools_roles_relations} WHERE mrid = %d";
       $result = db_query($query, arg(4));
       $item= db_fetch_object($result);
