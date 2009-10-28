@@ -93,7 +93,6 @@ function mobile_tools_menu() {
  * Implementation of hook_exit();
  */ 
 function mobile_tools_exit() {
-  //drupal_set_message($_SERVER['REQUEST_URI']);
   // FIX ME: check what cases don't need this. Bad for performance
   cache_clear_all(NULL, 'cache_page', TRUE);
 }
@@ -114,7 +113,8 @@ function mobile_tools_boot() {
   }
   if ($_SESSION['mobile-tools-site-type'] == 'mobile' || $theme_switched) {  
     variable_set('default_main_nodes', variable_get('default_nodes_main_mobile', 5));
-  } else {
+  } 
+  else {
     variable_set('default_main_nodes', variable_get('default_nodes_main_original', 10));
   }
 }
@@ -153,7 +153,7 @@ function mobile_tools_configuration_form() {
     '#default_value' => variable_get('mobile_tools_desktop_url', $base_url)
   );
   
- $form['mobile_tools_redirection'] = array (
+ $form['mobile_tools_redirection'] = array(
     '#type' => 'fieldset',
     '#title' => t('Redirection options'),
     '#collapsible' => TRUE,  
@@ -193,7 +193,7 @@ function mobile_tools_configuration_form() {
   $form['frontpage'] = array(
     '#type' => 'fieldset',
     '#title' => 'extra',
-    '#collapsible' => true,
+    '#collapsible' => TRUE,
   );
   
   $form['frontpage']['default_nodes_main_mobile'] = array(
@@ -312,7 +312,7 @@ function mobile_tools_themes_configuration_form() {
         '#collapsible' => TRUE,
         
       );
-      $form['mobile_tools_theme_configuration'][$mobile_detection_module . '_' . $group][$mobile_detection_module . '_' . $group . '_enable'] = array (
+      $form['mobile_tools_theme_configuration'][$mobile_detection_module . '_' . $group][$mobile_detection_module . '_' . $group . '_enable'] = array(
         '#type' => 'checkbox',
         '#title' => t('Enable filter for this device group'),
         '#default_value' => variable_get($mobile_detection_module . '_' . $group . '_enable', ''),
@@ -374,30 +374,34 @@ function mobile_tools_redirection_boot() {
  if (variable_get('mobile_tools_mobile_url', '') != variable_get('mobile_tools_desktop_url', '')) {
    // Checking the possible arguments
    if (isset($_GET['nomobile'])) {
-     if ($_GET['nomobile'] == 'true') {
+     if (strtolower($_GET['nomobile']) == 'true') {
         $redirect = 'FALSE';
-        setCookie('mt_redirect', 'FALSE', time()+3600*24*30, '/'); 
-      } if($_GET['nomobile'] == 'false') {
+        setCookie('mt_redirect', 'false', time()+3600*24*30, '/'); 
+      } 
+      elseif (strtolower($_GET['nomobile']) == 'false') {
         $redirect = 'TRUE';
-        setCookie('mt_redirect', 'TRUE', time()+3600*24*30, '/');
+        setCookie('mt_redirect', 'true', time()+3600*24*30, '/');
       }
-   } else {
+   } 
+   else {
       // keep cookie if set, else set to true (default)
       if (!isset($_COOKIE['mt_redirect'])) {
-        $redirect = 'TRUE';
-        setCookie('mt_redirect', 'TRUE', time()+3600*24*30, '/' );
-      } else {
+        $redirect = TRUE;
+        setCookie('mt_redirect', 'true', time()+3600*24*30, '/' );
+      } 
+      else {
         $redirect = $_COOKIE['mt_redirect'];
       }
     }
     // Redirections 
-    if (variable_get('mobile_tools_redirect', FALSE) && $redirect == 'TRUE') {
+    if (variable_get('mobile_tools_redirect', FALSE) && $redirect == 'true') {
       // The case where a mobile user is accessing the desktop site
       if ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && $_SESSION['mobile-tools-site-type'] == 'desktop') {
           $destination = variable_get('mobile_tools_mobile_url', '');
           mobile_tools_goto($destination);
       // The case where a desktop user is accessing the mobile site 
-      } else if ($_SESSION['mobile-tools-mobile-device']['type'] == 'desktop' && $_SESSION['mobile-tools-site-type'] == 'mobile') {
+      } 
+      elseif ($_SESSION['mobile-tools-mobile-device']['type'] == 'desktop' && $_SESSION['mobile-tools-site-type'] == 'mobile') {
          $destination =  variable_get('mobile_tools_desktop_url', $base_url);
          mobile_tools_goto($destination);
       }
@@ -422,7 +426,8 @@ function mobile_tools_is_mobile_device() {
   $device_detection = variable_get('mobile-tools-device-detection', 'mobile_tools');
   if ($device_detection != 'mobile_tools') {
     return module_invoke($device_detection, 'is_mobile_device');
-  } else {
+  } 
+  else {
     return _mobile_tools_is_mobile_device();
   }
 } 
@@ -483,7 +488,8 @@ function mobile_tools_device_groups() {
   $device_detection = variable_get('mobile-tools-device-detection', 'mobile_tools');
   if ($device_detection != 'mobile_tools') {
     return module_invoke($device_detection, 'device_groups');
-  } else {
+  } 
+  else {
     return _mobile_tools_device_groups();
   }
 }  
@@ -529,7 +535,8 @@ function _mobile_tools_message() {
     else {
       return variable_get('desktop_notification', DESKTOP_NOTIFICATION);
     }
-  } else {
+  } 
+  else {
    if ($_SESSION['mobile-tools-mobile-device']['type']  == 'mobile' ) {
       return variable_get('mobile_notification', MOBILE_NOTIFICATION);
     } 
@@ -555,13 +562,14 @@ function mobile_tools_themes_boot() {
     $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
     if (variable_get($mobile_detection_module . '_' . $group . '_enable', '') == 1) {
       $conf['theme_default'] = variable_get($mobile_detection_module . '_' . $group . '_theme', $conf['theme_default']);
-      return true;
-    } else {
+      return TRUE;
+    } 
+    else {
       $conf['theme_default'] = variable_get('mobile_tools_theme_name', $conf['theme_default']);
-      return true;
+      return TRUE;
     }
   }
-  return false;
+  return FALSE;
 }
 
 /**
@@ -578,7 +586,8 @@ function mobile_tools_list_theme_names() {
   }
   if (count($list) == 0) {
     return array();
-  } else {
+  } 
+  else {
     return array_combine($list, $list);
   }
 }
@@ -632,7 +641,8 @@ function mobile_tools_is_mobile_site() {
   $site_detection = variable_get('mobile-tools-site-type-detection', 'mobile_tools');
    if ($site_detection == 'mobile_tools') {
       return _mobile_tools_site_detection();;
-   } else {
+   } 
+   else {
       return module_invoke($site_detection, 'is_mobile_site'); 
    }
 }
@@ -670,18 +680,19 @@ function _mobile_tools_site_detection() {
   if ($mobile_url['host'] == $server_name && $desktop_url['host'] != $server_name) {      
     return 'mobile';
   } 
-  else if ($mobile_url['host'] != $server_name && $desktop_url['host'] == $server_name) {
+  elseif ($mobile_url['host'] != $server_name && $desktop_url['host'] == $server_name) {
     return 'desktop';
   } 
   
   // find longest url
   $longest_url = strlen($mobile) > strlen($desktop) ? $mobile : $desktop ;
   $protocol = isset($_SERVER['HTTPS']) ? 'https://' : 'http://';
-  $uri = $protocol . $_SERVER['HTTP_HOST'] .    $_SERVER['REQUEST_URI'];
+  $uri = $protocol . $_SERVER['HTTP_HOST'] .    request_uri();
   $pos = strpos($uri, preg_replace('{/$}', '', $longest_url));
-  if($pos === false) {
-    return $longest_url == $mobile ? 'destkop' : 'mobile';
-  } else {
+  if ($pos === FALSE) {
+    return $longest_url == $mobile ? 'desktop' : 'mobile';
+  } 
+  else {
     return $longest_url == $mobile ? 'mobile' : 'desktop';
   }
   
@@ -788,7 +799,8 @@ function mobile_tools_create_mobile_url($url) {
   if (count($url) == 3 ) {
     $url[0] = 'm';
     return 'http://'. implode('.', $url)  . $url_parsed['path'];
-  } else if (count($url) == 2) {
+  } 
+  elseif (count($url) == 2) {
     return 'http://m.'. implode('.', $url)  . $url_parsed['path'];
   } 
   else {
@@ -803,7 +815,7 @@ function mobile_tools_create_mobile_url($url) {
  *  To be implemented: create a list of non-compatible modules
  */ 
 function mobile_tools_compatibility() {
-  return array (
+  return array(
     'themekey',
     'domain',
     'image_fupload',

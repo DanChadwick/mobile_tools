@@ -1,5 +1,5 @@
 <?php
-
+// $Id$
 /**
  * @file
  *  Mobile Tools installation 
@@ -13,7 +13,7 @@ function mobile_tools_install() {
 function mobile_tools_uninstall() {
   $query = "SELECT * FROM {mobile_tools_roles_relations}";
   $result = db_query($query);
-  while($item = db_fetch_object($result)) {
+  while ($item = db_fetch_object($result)) {
     db_query("DELETE FROM {role} WHERE rid = %d", $item->mrid);
   }
   variable_del('default_main_nodes');

@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * Being called in the hook_init() implementation
  * This function is in charge of changing the user role 
@@ -100,7 +101,7 @@ function mobile_tools_roles_overview() {
   }
   $headers = array("original role", "mobile role");
   if (count($rows) == 0) {
-    $output .= '<div class="message">No Mobile roles where assigned</div>';
+    $output .= '<div class="message">No Mobile roles were assigned</div>';
   } 
   else {
     $output .= theme('table', $headers, $rows);
@@ -153,7 +154,7 @@ function mobile_tools_user_roles() {
   $role->id = $rid;
   $role->name = $name;
   $query = "SELECT COUNT(*) as count, mrid FROM {mobile_tools_roles_relations} WHERE rid = %d GROUP BY mrid";
-  $result = db_query($query,$rid);
+  $result = db_query($query, $rid);
   $item = db_fetch_object($result);
  
   if ($item->count != 0) {
