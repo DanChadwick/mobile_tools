@@ -81,7 +81,7 @@ function mobile_tools_roles_configuration_form() {
         '#type' => 'checkbox',
         '#title' => $item->name,
         '#default_value' => ($role->has_sibling) ? TRUE : FALSE,
-        '#description' => t('Enabling will create the %role role . the name can be changed aferwards in the !roles settings page', array('%role' => $role->name .' (Mobile)', '!role' =>  l('roles', 'admin/user/roles'))),
+        '#description' => t('Enabling will create the %role role . the name can be changed afterwards in the !roles settings page', array('%role' => $role->name .' (Mobile)', '!role' =>  l('roless', 'admin/user/roles'))),
       );
     }
   }

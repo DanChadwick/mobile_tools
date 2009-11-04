@@ -132,7 +132,7 @@ function mobile_tools_configuration_form() {
   global $base_url;
   $form['mobile_tools_configuration'] = array(
     '#type' => 'fieldset',
-    '#title' => 'Genearl configuration',
+    '#title' => 'General configuration',
     '#description' => 'Enter the mobile and desktop url for your site. If both urls are equal there will be no redirection, but only theme switching. Go to "theme switching" to configure the theme',
     '#collapsible' => TRUE,
   );
@@ -164,7 +164,7 @@ function mobile_tools_configuration_form() {
     '#title' => t('Enable automatic redirection of the mobile user'),
     '#default_value' => variable_get('mobile_tools_redirect', FALSE),
     '#description' => 'Mobile visitors will be redirected to the mobile site. The module support 
-    mobile users that want to see the desktop site. In order to return mobile users to the desktop site, use the ?nomobil=true argument. The module
+    mobile users that want to see the desktop site. In order to return mobile users to the desktop site, use the ?nomobile=true argument. The module
     will set a cookie that remembers that the user does not want to be redirected. To undo, send the user to /gomobile. The module will redirect 
     the user to the mobile site and reset the cookie!',
   );
@@ -725,25 +725,27 @@ function mobile_tools_form_alter(&$form, $form_state, $form_id) {
       $query = "SELECT COUNT(*) as count FROM {mobile_tools_roles_relations} WHERE mrid = %d";
       $result = db_query($query, arg(4));
       $item= db_fetch_object($result);
-      if ($item->count == 0) {
-        $form['mobile_tools_configure_role_'. arg(4)] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Create a mobile context for this user role'),
-          '#default_value' => TRUE,
-          '#description' => t('check if you want to add a mobile context to this role. Adding a mobile context will result in the creation of a new role that will be assigned to the user when the site is beeing mobilized. When unchecking all configurations will be lost for that role.'),
-        );
-        $form['mobile_tools_role_type'] = array(
-          '#type' => 'hidden',
-          '#value' => 'desktop'
-        );
-      } 
-      else {
-        $form['mobile_tools_role_type'] = array(
-          '#type' => 'hidden',
-          '#value' => 'mobile'
-        );
-      }
+      if (isset($item)) {
+        if ($item->count == 0) {
+          $form['mobile_tools_configure_role_'. arg(4)] = array(
+            '#type' => 'checkbox',
+            '#title' => t('Create a mobile context for this user role'),
+            '#default_value' => TRUE,
+            '#description' => t('check if you want to add a mobile context to this role. Adding a mobile context will result in the creation of a new role that will be assigned to the user when the site is beeing mobilized. When unchecking all configurations will be lost for that role.'),
+          );
+          $form['mobile_tools_role_type'] = array(
+            '#type' => 'hidden',
+            '#value' => 'desktop'
+          );
+        } 
+        else {
+          $form['mobile_tools_role_type'] = array(
+            '#type' => 'hidden',
+            '#value' => 'mobile'
+          );
+        }
       $form['#submit'][] = 'mobile_tools_roles_configuration_submit';
+      }
       break;
     case 'user_profile_form': 
       unset($form['account']['roles']['#options']);
