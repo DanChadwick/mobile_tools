@@ -169,6 +169,13 @@ function mobile_tools_configuration_form() {
     the user to the mobile site and reset the cookie!',
   );
   
+  $form['mobile_tools_redirection']['mobile_tools_cookie_session'] = array (
+    '#type' => 'textfield',
+    '#title' => 'Redirection cookie lifetime (seconds)',
+    '#description' => t('This field is only used when using the nomobile=true setting. This is the lifetime of the cookie that determines how long the session is remembered. Choose 0 for only the session.'),
+    '#default_value' => variable_get('mobile_tools_cookie_session', 3600*24*30),
+  );
+  
   $form['mobile_tools_notification'] = array(
     '#type' => 'fieldset',
     '#title' => t('Mobile Tools block message options'),
@@ -373,21 +380,22 @@ function mobile_tools_redirection_boot() {
  //only consider redirectoin if the mobile url and the destkop url are different
  if (variable_get('mobile_tools_mobile_url', '') != variable_get('mobile_tools_desktop_url', '')) {
    // Checking the possible arguments
+   $session_time = time() + variable_get('mobile_tools_cookie_session', 3600*24*30);
    if (isset($_GET['nomobile'])) {
      if (strtolower($_GET['nomobile']) == 'true') {
         $redirect = 'FALSE';
-        setCookie('mt_redirect', 'false', time()+3600*24*30, '/'); 
+        setCookie('mt_redirect', 'false', variable_get('mobile_tools_cookie_lifetime', $session_time) , '/'); 
       } 
       elseif (strtolower($_GET['nomobile']) == 'false') {
         $redirect = 'TRUE';
-        setCookie('mt_redirect', 'true', time()+3600*24*30, '/');
+        setCookie('mt_redirect', 'true', variable_get('mobile_tools_cookie_lifetime',$session_time) , '/');
       }
    } 
    else {
       // keep cookie if set, else set to true (default)
       if (!isset($_COOKIE['mt_redirect'])) {
         $redirect = TRUE;
-        setCookie('mt_redirect', 'true', time()+3600*24*30, '/' );
+        setCookie('mt_redirect', 'true', $session_time, '/' );
       } 
       else {
         $redirect = $_COOKIE['mt_redirect'];
@@ -397,7 +405,7 @@ function mobile_tools_redirection_boot() {
     if (variable_get('mobile_tools_redirect', FALSE) && $redirect == 'true') {
       // The case where a mobile user is accessing the desktop site
       if ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && $_SESSION['mobile-tools-site-type'] == 'desktop') {
-          $destination = variable_get('mobile_tools_mobile_url', '');
+          $destination = mobile_tools_get_redirect_url();
           mobile_tools_goto($destination);
       // The case where a desktop user is accessing the mobile site 
       } 
@@ -695,8 +703,6 @@ function _mobile_tools_site_detection() {
   else {
     return $longest_url == $mobile ? 'mobile' : 'desktop';
   }
-  
- 
 }
 /**
  *  This function does some kind of normalisation of the urls when there is no subdomain available in the url
@@ -871,4 +877,29 @@ function mobile_tools_ctools_plugin_directory($module, $plugin) {
   if ($plugin == 'access') {
     return 'plugins/' . $plugin;
   }
+}
+
+/**
+ * Creation of the redirect url. Special care to create the correct url that will 
+ * cause the Global Redirect module not to redirect!  
+ */ 
+function mobile_tools_get_redirect_url() {
+  include_once './includes/bootstrap.inc';
+  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+  // special Siruna delimitor 
+  // collect query parameters
+   if(drupal_is_front_page()) {
+    return variable_get('mobile_tools_mobile_url', '');
+   }
+  
+  $query = array();
+  foreach ($_GET as $key => $value) {
+    if ($key != 'q') {
+      $query[] =  $key . '=' . $value;
+    }    
+  }
+  $query = (count($query) > 0) ? implode('&', $query) : '';
+  //create the path and reassemble
+  $base = preg_replace('{/$}', '', variable_get('mobile_tools_mobile_url', ''));
+  return $base . url($_GET['q'], array('query' => $query));
 }
