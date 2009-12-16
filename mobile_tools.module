@@ -319,10 +319,10 @@ function mobile_tools_themes_configuration_form() {
 
    $mobile_groups = module_invoke(variable_get('mobile-tools-device-detection', 'mobile_tools'), 'device_groups');
    $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
-   foreach ($mobile_groups as $group) {
+   foreach ($mobile_groups as $group => $group_title) {
       $form['mobile_tools_theme_configuration'][$mobile_detection_module . '_' . $group] = array(
         '#type' => 'fieldset',
-        '#title' => $group,
+        '#title' => $group_title,
         '#collapsible' => TRUE,
         
       );
@@ -385,7 +385,9 @@ function mobile_tools_site_type_options() {
 function mobile_tools_redirection_boot() {
  global $base_url;
  //only consider redirectoin if the mobile url and the destkop url are different
- if (variable_get('mobile_tools_mobile_url', '') != variable_get('mobile_tools_desktop_url', '')) {
+ $mobile_url = preg_replace('{/$}', '', variable_get('mobile_tools_mobile_url', ''));
+ $desktop_url = preg_replace('{/$}', '', variable_get('mobile_tools_desktop_url', ''));
+ if ($mobile_url != $desktop_url) {
    // Checking the possible arguments
    $session_time = time() + variable_get('mobile_tools_cookie_session', 3600*24*30);
    if (isset($_GET['nomobile'])) {
@@ -479,7 +481,7 @@ function _mobile_tools_is_mobile_device() {
       $mobile_browser = array('type' => 'mobile', 'group' => 'android');; // mobile browser is either TRUE or FALSE depending on the setting of android when calling the function
     break; // break out and skip the rest if we've had a match on android
     case (FALSE !== stripos($user_agent, 'opera mini')); // we find opera mini in the user agent
-      $mobile_browser = array('type' => 'mobile', 'group' => 'opera mini'); // mobile browser is either TRUE or FALSE depending on the setting of opera when calling the function
+      $mobile_browser = array('type' => 'mobile', 'group' => 'opera_mini'); // mobile browser is either TRUE or FALSE depending on the setting of opera when calling the function
     break; // break out and skip the rest if we've had a match on opera
     case (FALSE !== stripos($user_agent, 'blackberry')); // we find blackberry in the user agent
       $mobile_browser = array('type' => 'mobile', 'group' => 'blackberry'); // mobile browser is either TRUE or FALSE depending on the setting of blackberry when calling the function
@@ -529,7 +531,7 @@ function mobile_tools_device_groups() {
  *  to select different themes for different device groups.   
  */
 function _mobile_tools_device_groups() {
-  return array('iphone', 'ipod', 'android', 'opera mini', 'blackberry');
+return array('iphone'=>'iPhone', 'ipod'=>'iPod', 'android'=>'Android', 'opera_mini'=>'Opera Mini', 'blackberry'=>'BlackBerry');
 } 
 
 /*****************************************

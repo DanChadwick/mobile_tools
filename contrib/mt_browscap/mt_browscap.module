@@ -17,7 +17,7 @@ function mt_browscap_is_mobile_device() {
  $groups = mt_browscap_device_groups();
  $group = '';
  if (in_array($info['browser'], $groups)) {
-  $group = $info['browser'];
+  $group = array_search($info['browser'], $groups);
  }
  return array('type'=> $type, 'group' => $group);
 }
@@ -26,7 +26,8 @@ function mt_browscap_is_mobile_device() {
  *  Implementation of hook_device_groups() as provided by Mobile Tools module 
  */ 
 function mt_browscap_device_groups() {
-  return array('iPhone', 'iPod', 'Android', 'Opera Mini', 'BlackBerry');
+  return array('iphone'=>'iPhone', 'ipod'=>'iPod', 'android'=>'Android', 'opera_mini'=>'Opera Mini', 'blackberry'=>'BlackBerry');
+	
 }
 
 /** 
