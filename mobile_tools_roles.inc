@@ -246,6 +246,4 @@ function mobile_tools_edit_mobile_role($op, $role) {
       db_query("INSERT INTO {mobile_tools_roles_relations} (rid, mrid) VALUES (%d, %d)", $role->id, db_last_insert_id('role', 'rid'));
     break;  
   }
-
-
 }

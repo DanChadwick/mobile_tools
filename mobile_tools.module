@@ -468,9 +468,20 @@ function mobile_tools_is_mobile_device() {
  */ 
 function _mobile_tools_is_mobile_device() {
   $mobile_browser   = array('type' => 'desktop', 'group' => ''); // set mobile browser as FALSE till we can prove otherwise
- $user_agent       = empty($_SERVER['HTTP_USER_AGENT'])?'none':$_SERVER['HTTP_USER_AGENT']; // get the user agent value - this should be cleaned to ensure no nefarious input gets executed
-  $accept           = $_SERVER['HTTP_ACCEPT']; // get the content accept value - this should be cleaned to ensure no nefarious input gets executed
-   switch (TRUE) { 
+  if (array_key_exists('HTTP_USER_AGENT', $_SERVER)) {
+	    $user_agent = $_SERVER['HTTP_USER_AGENT']; 
+	  } else {
+	    return FALSE;
+	  }
+	  // get the content accept value
+	  // FIXME: this should be cleaned to ensure no nefarious input gets executed
+	  if (array_key_exists('HTTP_ACCEPT', $_SERVER)) {
+	  	$accept = $_SERVER['HTTP_ACCEPT'];
+	  } else {
+	  	$accept = '';
+	  }
+  
+  switch (TRUE) { 
     case (FALSE !== stripos($user_agent, 'ipod')); // we find the words iphone or ipod in the user agent
       $mobile_browser = array('type' => 'mobile', 'group' => 'ipod'); // mobile browser is either TRUE or FALSE depending on the setting of iphone when calling the function
     break; // break out and skip the rest if we've had a match on the iphone or ipod
