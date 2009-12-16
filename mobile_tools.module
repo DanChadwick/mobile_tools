@@ -176,6 +176,13 @@ function mobile_tools_configuration_form() {
     '#default_value' => variable_get('mobile_tools_cookie_session', 3600*24*30),
   );
   
+  $form['mobile_tools_redirection']['mobile_tools_redirect_exceptions'] = array(
+  	'#type' => 'textarea',
+    '#title' => 'redirection exceptions',
+    '#description' => t('Give the paths to pages that should not be redirected. Put each path on a seperate line. The \'*\' character is a wildcard.'),
+    '#default_value' => variable_get('mobile_tools_redirect_exceptions', ''),
+  );
+  
   $form['mobile_tools_notification'] = array(
     '#type' => 'fieldset',
     '#title' => t('Mobile Tools block message options'),
@@ -401,8 +408,23 @@ function mobile_tools_redirection_boot() {
         $redirect = $_COOKIE['mt_redirect'];
       }
     }
+    
+    $pages = variable_get('mobile_tools_redirect_exceptions', '');
+    $page_match = FALSE;
+    if(isset($_GET['q']) && $pages != '') {
+	    //check if there is no exception in the redirect path (code comes from block.module)
+	  include_once './includes/bootstrap.inc';
+	  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+	   $path = drupal_get_path_alias($_GET['q']);
+	    // Compare with the internal and path alias (if any).
+	   $page_match = drupal_match_path($path, $pages);
+	    if ($path != $_GET['q']) {
+	      $page_match = $page_match || drupal_match_path($_GET['q'], $pages);
+	    }
+    }
+    
     // Redirections 
-    if (variable_get('mobile_tools_redirect', FALSE) && $redirect == 'true') {
+    if (variable_get('mobile_tools_redirect', FALSE) && $redirect == 'true' && !$page_match) {
       // The case where a mobile user is accessing the desktop site
       if ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && $_SESSION['mobile-tools-site-type'] == 'desktop') {
           $destination = mobile_tools_get_redirect_url();
