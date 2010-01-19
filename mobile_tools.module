@@ -94,7 +94,9 @@ function mobile_tools_menu() {
  */ 
 function mobile_tools_exit() {
   // FIX ME: check what cases don't need this. Bad for performance
-  cache_clear_all(NULL, 'cache_page', TRUE);
+  if (variable_get('mobile-tools-theme-switch', '') == 'mobile-tools-mobile-device') {
+    cache_clear_all(NULL, 'cache_page', TRUE);
+  }
 }
 /**
  *  Implementation of hook_boot().
@@ -204,13 +206,14 @@ function mobile_tools_configuration_form() {
     '#default_value' => variable_get('desktop_notification', DESKTOP_NOTIFICATION),
   ); 
   
-  $form['frontpage'] = array(
+  $form['extra'] = array(
     '#type' => 'fieldset',
     '#title' => 'extra',
     '#collapsible' => TRUE,
   );
   
-  $form['frontpage']['default_nodes_main_mobile'] = array(
+
+  $form['extra']['default_nodes_main_mobile'] = array(
       '#type' => 'select',
       '#title' => t('Number of posts on main page for the mobile version'),
       '#default_value' => variable_get('default_nodes_main_mobile', 10),
@@ -301,8 +304,8 @@ function mobile_tools_themes_configuration_form() {
     '#type' => 'radios',
     '#title' => t('When do you want to switch themes'),
     '#default_value' => variable_get('mobile-tools-theme-switch', 'mobile-tools-no-switch'),
-    '#options' =>   array('mobile-tools-no-switch' => 'No theme switch', 'mobile-tools-mobile-device' => 'Switch theme for a mobile device', 'mobile-tools-mobile-url' => 'Switch theme based on the URL'),
-    '#description' => 'Choose one of these methodes!',
+    '#options' =>   array('mobile-tools-no-switch' => 'No theme switch', 'mobile-tools-mobile-device' => 'Switch theme for a mobile device *', 'mobile-tools-mobile-url' => 'Switch theme based on the URL'),
+    '#description' => 'Choose one of these methodes! *This is not recommended since using 1 url for both mobile and desktop site disable the drupal caching.',
   );
   if (count($themes) > 0 ) {
    $form['mobile_tools_theme_configuration']['mobile_tools_theme_name'] = array(
@@ -599,7 +602,9 @@ function _mobile_tools_message() {
  */ 
 function mobile_tools_themes_boot() {
   global $conf;
-  cache_clear_all(NULL, 'cache_page', TRUE); 
+  if (variable_get('mobile-tools-theme-switch', '') == 'mobile-tools-mobile-device') {
+    cache_clear_all(NULL, 'cache_page', TRUE);
+  }
   if ( ($_SESSION['mobile-tools-site-type'] == 'mobile' &&  variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-url') || (variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-device' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
     global $conf;
     $group = $_SESSION['mobile-tools-mobile-device']['group'];
