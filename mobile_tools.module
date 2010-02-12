@@ -165,9 +165,9 @@ function mobile_tools_configuration_form() {
     '#type' => 'checkbox',
     '#title' => t('Enable automatic redirection of the mobile user'),
     '#default_value' => variable_get('mobile_tools_redirect', FALSE),
-    '#description' => 'Mobile visitors will be redirected to the mobile site. The module support 
-    mobile users that want to see the desktop site. In order to return mobile users to the desktop site, use the ?nomobile=true argument. The module
-    will set a cookie that remembers that the user does not want to be redirected. To undo, send the user to /gomobile. The module will redirect 
+    '#description' => 'Mobile visitors will automatically be redirected to the mobile site. But mobile users can also -- if they prefer --
+    view the desktop version. In order to do so, append ?nomobil=true to the URL. The module
+    will set a cookie that remembers that the user does not want to be redirected. To undo, send the user to /gomobile. The module will redirect
     the user to the mobile site and reset the cookie!',
   );
   
@@ -305,7 +305,7 @@ function mobile_tools_themes_configuration_form() {
     '#title' => t('When do you want to switch themes'),
     '#default_value' => variable_get('mobile-tools-theme-switch', 'mobile-tools-no-switch'),
     '#options' =>   array('mobile-tools-no-switch' => 'No theme switch', 'mobile-tools-mobile-device' => 'Switch theme for a mobile device *', 'mobile-tools-mobile-url' => 'Switch theme based on the URL'),
-    '#description' => 'Choose one of these methodes! *This is not recommended since using 1 url for both mobile and desktop site disable the drupal caching.',
+    '#description' => 'Choose one of these methods. *This is not recommended since using 1 url for both mobile and desktop site disable the drupal caching.',
   );
   if (count($themes) > 0 ) {
    $form['mobile_tools_theme_configuration']['mobile_tools_theme_name'] = array(
@@ -427,7 +427,7 @@ function mobile_tools_redirection_boot() {
 	      $page_match = $page_match || drupal_match_path($_GET['q'], $pages);
 	    }
     }
-    
+
     // Redirections 
     if (variable_get('mobile_tools_redirect', FALSE) && $redirect == 'true' && !$page_match) {
       // The case where a mobile user is accessing the desktop site
