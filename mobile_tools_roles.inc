@@ -7,13 +7,13 @@
 function mobile_tools_roles_boot() {
   global $user;
   $roles = $user->roles;
-  
+  print 'test';
   //count the number of mobile roles... must be bigger then 1
   $item = db_fetch_object(db_query("SELECT COUNT(*) as count FROM {mobile_tools_roles_relations}"));
   if ($item->count > 0) {
     foreach ($roles as $key => $value) {
       $role = mobile_tools_roles_info(array('id' => $key));
-      if ($role->type == 'desktop' && $role->has_sibling == 1 && $_SESSION['mobile-tools-site-type'] == 'mobile' || ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && variable_get('mobile_tools_handling', FALSE) == 'theme-switch')) {
+      if ($role->type == 'desktop' && $role->has_sibling == 1 && ($_SESSION['mobile-tools-site-type'] == 'mobile' || ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && variable_get('mobile-tools-theme-switch', FALSE) == 'mobile-tools-mobile-device'))) {
         unset($user->roles[$key]);
         $user->roles[$role->sibling['id']] = $role->sibling['name'];  
       }
@@ -26,18 +26,20 @@ function mobile_tools_roles_boot() {
  *  This is the same actions as in the hook_init() method 
  */ 
 function mobile_tools_user($op, &$edit, &$account, $category = NULL) {
-  switch ($op) {
-    case 'load':
-      $user = $account;
-      $roles = $user->roles;
-  foreach ($roles as $key => $value) {
-    $role = mobile_tools_roles_info(array('id' => $key));
-    if ($role->type == 'desktop' && $role->has_sibling == 1 && $_SESSION['mobile-tools-site-type'] == 'mobile') {
-      unset($user->roles[$key]);
-      $user->roles[$role->sibling['id']] = $role->sibling['name'];  
+  if(variable_get('mobile_tools_enable_roles', 0)) {
+    switch ($op) {
+      case 'load':
+        $user = $account;
+        $roles = $user->roles;
+    foreach ($roles as $key => $value) {
+      $role = mobile_tools_roles_info(array('id' => $key));
+      if ($role->type == 'desktop' && $role->has_sibling == 1 && $_SESSION['mobile-tools-site-type'] == 'mobile') {
+        unset($user->roles[$key]);
+        $user->roles[$role->sibling['id']] = $role->sibling['name'];
+      }
     }
-  }
-    break;
+      break;
+    }
   }
 }
 /**
