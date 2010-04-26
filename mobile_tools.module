@@ -491,6 +491,9 @@ function _mobile_tools_is_mobile_device() {
 	  }
   
   switch (TRUE) { 
+    case (FALSE !== stripos($user_agent, 'ipad'));
+      $mobile_browser = array('type' => 'desktop', 'group' => 'ipad');
+      reak;
     case (FALSE !== stripos($user_agent, 'ipod')); // we find the words iphone or ipod in the user agent
       $mobile_browser = array('type' => 'mobile', 'group' => 'ipod'); // mobile browser is either TRUE or FALSE depending on the setting of iphone when calling the function
     break; // break out and skip the rest if we've had a match on the iphone or ipod
