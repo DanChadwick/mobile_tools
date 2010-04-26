@@ -465,6 +465,7 @@ function mobile_tools_load_modules() {
  */
 function mobile_tools_is_mobile_device() {
   $device_detection = variable_get('mobile-tools-device-detection', 'mobile_tools');
+  drupal_load('module', $device_detection);
   if ($device_detection != 'mobile_tools') {
     return module_invoke($device_detection, 'is_mobile_device');
   } 
@@ -698,6 +699,7 @@ function mobile_tools_get_module_names($array) {
  */ 
 function mobile_tools_is_mobile_site() {
   $site_detection = variable_get('mobile-tools-site-type-detection', 'mobile_tools');
+  drupal_load('module', $site_detection);
    if ($site_detection == 'mobile_tools') {
       return _mobile_tools_site_detection();;
    } 
