@@ -114,7 +114,7 @@ function mobile_tools_boot() {
     mobile_tools_roles_boot();  // assigns the user the mobile role
   }
   if ($_SESSION['mobile-tools-site-type'] == 'mobile' || $theme_switched) {
-    $conf['default_main_nodes'] = variable_get('default_nodes_main_mobile', 5);
+    $conf['default_nodes_main'] = variable_get('default_nodes_main_mobile', 5);
   } 
 }
 
@@ -840,7 +840,7 @@ function mobile_tools_form_alter(&$form, $form_state, $form_id) {
 }
 
 function mobile_tools_node_configuration_submit($form) {
-  variable_set('default_main_nodes_original', $form['#post']['default_main_nodes']);
+  variable_set('default_nodes_main_original', $form['#post']['default_nodes_main']);
 }
 
 /**
