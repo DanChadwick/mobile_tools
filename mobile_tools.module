@@ -801,9 +801,12 @@ function mobile_tools_form_alter(&$form, $form_state, $form_id) {
       $form['#submit'][] = 'mobile_tools_roles_configuration_submit';
       }
       break;
-    case 'user_profile_form': 
-      unset($form['account']['roles']['#options']);
-      $form['account']['roles']['#options'] = mobile_tools_user_roles();
+    case 'user_profile_form':
+        // We make sure that the mobile roles are not being displayed
+        $mobile_roles = mobile_tools_mobile_user_roles();
+        foreach($mobile_roles as $rid => $role) {
+          unset($form['account']['roles']['#options'][$rid]);
+        }
       break;
     case 'node_configure':
       $form['default_nodes_main_mobile'] = array(

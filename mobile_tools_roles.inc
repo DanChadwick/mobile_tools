@@ -7,15 +7,14 @@
 function mobile_tools_roles_boot() {
   global $user;
   $roles = $user->roles;
-  print 'test';
-  //count the number of mobile roles... must be bigger then 1
+//count the number of mobile roles... must be bigger then 1
   $item = db_fetch_object(db_query("SELECT COUNT(*) as count FROM {mobile_tools_roles_relations}"));
-  if ($item->count > 0) {
+   if ($item->count > 0) {
     foreach ($roles as $key => $value) {
       $role = mobile_tools_roles_info(array('id' => $key));
       if ($role->type == 'desktop' && $role->has_sibling == 1 && ($_SESSION['mobile-tools-site-type'] == 'mobile' || ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && variable_get('mobile-tools-theme-switch', FALSE) == 'mobile-tools-mobile-device'))) {
         unset($user->roles[$key]);
-        $user->roles[$role->sibling['id']] = $role->sibling['name'];  
+        $user->roles[$role->sibling['id']] = $role->sibling['name'];
       }
     }
   }
@@ -112,7 +111,7 @@ function mobile_tools_roles_overview() {
   return $output;
 }
 /**
- * Helper function to return the user roles
+ * Helper function to return the desktop user roles
  */ 
 function mobile_tools_user_roles() {
   //$roles = array('none');
@@ -127,6 +126,21 @@ function mobile_tools_user_roles() {
   return $desktop_roles;
 }
 
+/**
+ * Helper function to return the mobile user roles
+ */
+function mobile_tools_mobile_user_roles() {
+  //$roles = array('none');
+  $roles = user_roles();
+  $mobile_roles = array();
+  foreach ($roles as $key => $value) {
+    $role = mobile_tools_roles_info(array('id' => $key));
+    if ($role->type == 'mobile') {
+      $mobile_roles[$key] = $value;
+    }
+  }
+  return $mobile_roles;
+}
  /**
  * Function helping in getting information for each role:
  * @param $identifier
