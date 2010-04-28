@@ -557,7 +557,7 @@ function mobile_tools_device_groups() {
  *  to select different themes for different device groups.   
  */
 function _mobile_tools_device_groups() {
-return array('iphone'=>'iPhone', 'ipod'=>'iPod', 'android'=>'Android', 'opera_mini'=>'Opera Mini', 'blackberry'=>'BlackBerry');
+return array('iphone'=>'iPhone', 'ipod'=>'iPod', 'ipad'=>'iPad', 'android'=>'Android', 'opera_mini'=>'Opera Mini', 'blackberry'=>'BlackBerry');
 } 
 
 /*****************************************
