@@ -32,8 +32,8 @@ function mobile_tools_is_mobile_ctools_access() {
 function mobile_tools_is_mobile_ctools_access_settings(&$form, &$form_state, $conf) {
   $perms = array();
 
-  $options = drupal_map_assoc(mobile_tools_device_groups());
-
+  $options = mobile_tools_device_groups();
+  $options['mobile'] = 'Mobile device';
   $form['settings']['description'] = array(
     '#type' => 'textfield',
     '#title' => t('Administrative desc'),
@@ -56,6 +56,9 @@ function mobile_tools_is_mobile_ctools_access_settings(&$form, &$form_state, $co
 function mobile_tools_is_mobile_ctools_access_check($conf, $contexts) {
   $browser = mobile_tools_is_mobile_device();
   $access = in_array($browser['group'], $conf['mobile']);
+  if (in_array($browser['type'], $conf['mobile']) && $browser['type'] == 'mobile') {
+    return TRUE;
+  }
   return $access;
 }
 
