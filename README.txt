@@ -14,6 +14,15 @@ This module is designed to work together with the Siruna (http://www.drupal.org/
 
 MORE INFORMATION AND SHOWCASES CAN BE FOUND AT http://www.mobiledrupal.com
 
+AGGRESSIVE CACHING
+==================
+The Mobile Tools module does not support device detection when you use aggressive caching. 
+Aggressive cachig bypasses any Drupal loading and by consequence the device detection system.
+
+Recommended is to try user agent detection in your caching server and use a similar algorithm than 
+the one used by Mobile Tools. 
+
+
 AUTHOR/MAINTAINER
 ======================
 Tom Deryckere
