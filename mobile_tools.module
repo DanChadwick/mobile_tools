@@ -951,3 +951,33 @@ function mobile_tools_get_redirect_url() {
   $base = preg_replace('{/$}', '', variable_get('mobile_tools_mobile_url', ''));
   return $base . url($_GET['q'], array('query' => $query));
 }
+
+/**
+ * Adding support for Node Displays build modes
+ */
+
+/**
+ * Implementation of hook_content_build_modes
+ */
+function mobile_tools_content_build_modes() {
+  return array(
+    'mobile_tools' => array(
+      'title' => t('RSS'),
+      'build modes' => array(
+        'mobile_tools' => array(
+          'title' => t('Mobile theme'),
+          'views style' => TRUE,
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_nodeapi
+ */
+function mobile_tools_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'load' && $_SESSION['mobile-tools-site-type'] == 'mobile') {
+    $node->build_mode = 'mobile_tools';
+  }
+}

@@ -27,7 +27,6 @@ function mt_browscap_is_mobile_device() {
  */ 
 function mt_browscap_device_groups() {
   return array('iphone'=>'iPhone', 'ipod'=>'iPod', 'android'=>'Android', 'opera_mini'=>'Opera Mini', 'blackberry'=>'BlackBerry');
-	
 }
 
 /** 
