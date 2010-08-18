@@ -724,8 +724,11 @@ function _mobile_tools_site_detection() {
   if (!array_key_exists('path', $mobile_url)) {
     $mobile_url['path'] = '';
   }  
-   
-  $server_name = mobile_tools_prepare_url($_SERVER['SERVER_NAME']);
+  // If $_SERVER['HTTP_HOST'] is not set just return desktop
+  if(!isset($_SERVER['HTTP_HOST'])){
+    return 'desktop';
+  } 
+  $server_name = mobile_tools_prepare_url($_SERVER['HTTP_HOST']);
   // Check domain first
   if ($mobile_url['host'] == $server_name && $desktop_url['host'] != $server_name) {      
     return 'mobile';
