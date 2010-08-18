@@ -26,7 +26,9 @@
  */
 function cache_get($cid, $table = 'cache') {
   global $user;
-  cache_rewrite_cid($cid); // THIS IS THE MAGIC
+  if($table == "cache_page"){
+    cache_rewrite_cid($cid); // THIS IS THE MAGIC
+  }
   // Garbage collection necessary when enforcing a minimum cache lifetime
   $cache_flush = variable_get('cache_flush_'. $table, 0);
   if ($cache_flush && ($cache_flush + variable_get('cache_lifetime', 0) <= time())) {
@@ -199,7 +201,7 @@ function cache_clear_all($cid = NULL, $table = NULL, $wildcard = FALSE) {
  * for several device groups
  */
 function cache_rewrite_cid(&$cid){
-  require_once(dir(__FILE__) . '/mobile_tools.module');
+  require_once(__DIR__ . '/mobile_tools.module');
   $result =  _mobile_tools_is_mobile_device();
   $query = $_GET;
   unset($query['q']);
