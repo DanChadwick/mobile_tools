@@ -115,6 +115,9 @@ function cache_get($cid, $table = 'cache') {
  *   A string containing HTTP header information for cached pages.
  */
 function cache_set($cid, $data, $table = 'cache', $expire = CACHE_PERMANENT, $headers = NULL) {
+  if($table == 'cache_page'){
+    cache_rewrite_cid($cid);
+  }
   $serialized = 0;
   if (is_object($data) || is_array($data)) {
     $data = serialize($data);
