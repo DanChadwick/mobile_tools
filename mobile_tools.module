@@ -89,15 +89,7 @@ function mobile_tools_menu() {
   ); 
   return $items;
 } 
-/**
- * Implementation of hook_exit();
- */ 
-function mobile_tools_exit() {
-  // FIX ME: check what cases don't need this. Bad for performance
-  if (variable_get('mobile-tools-theme-switch', '') == 'mobile-tools-mobile-device') {
-    cache_clear_all(NULL, 'cache_page', TRUE);
-  }
-}
+
 /**
  *  Implementation of hook_boot().
  */ 
@@ -612,13 +604,15 @@ function _mobile_tools_message() {
  */ 
 function mobile_tools_themes_boot() {
   global $conf;
-  if (variable_get('mobile-tools-theme-switch', '') == 'mobile-tools-mobile-device') {
-    cache_clear_all(NULL, 'cache_page', TRUE);
-  }
   if ( ($_SESSION['mobile-tools-site-type'] == 'mobile' &&  variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-url') || (variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-device' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
     global $conf;
     $group = $_SESSION['mobile-tools-mobile-device']['group'];
     $type = $_SESSION['mobile-tools-mobile-device']['type'];
+    $query = $_GET;
+    unset($query['q']);
+    $seperator = count($query) ? '&' : '?';
+     $_SERVER['REQUEST_URI'] =   $_SERVER['REQUEST_URI'] . $seperator . "mobile_group=$group&device=$type";
+
     $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
     if (variable_get($mobile_detection_module . '_' . $group . '_enable', '') == 1) {
       $conf['theme_default'] = variable_get($mobile_detection_module . '_' . $group . '_theme', $conf['theme_default']);
