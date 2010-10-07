@@ -16,7 +16,7 @@
   */    
  define('MOBILE_NOTIFICATION', '<a href="">Mobile View</a>');
  define('DESKTOP_NOTIFICATION', '<a href="">Regular View</a>');
- include(dirname(__FILE__) . '/mobile_tools_roles.inc');
+
  
  /*****************                                   
   * Drupal hooks  *
@@ -27,9 +27,8 @@
 function mobile_tools_help($path, $arg) {
   switch ($path) {
       case 'admin/help#mobile_tools':
-        $output .= '<p>'. t('The mobile tools module assembles a range of functionality helping out in making your Drupal site mobile. Visit the !documentation for more information') .'<p>';
+        return '<p>'. t('The mobile tools module assembles a range of functionality helping out in making your Drupal site mobile. Visit the !documentation for more information') .'<p>';
     }
-  return $output;
 }
 /**
  * Implementation of hook_perm().
@@ -85,7 +84,7 @@ function mobile_tools_menu() {
     'description' => t('Redirect to the mobile site.'),
     'access callback' => TRUE,
     'page callback' => 'mobile_tools_redirect',
-    'type' => MENU_CALLBACK_ITEM,
+    'type' => MENU_CALLBACK,
   ); 
   return $items;
 } 
@@ -103,6 +102,7 @@ function mobile_tools_boot() {
   $theme_switched = mobile_tools_themes_boot(); 
   
   if (variable_get('mobile_tools_enable_roles', 0) ) {
+    include(dirname(__FILE__) . '/mobile_tools_roles.inc');
     mobile_tools_roles_boot();  // assigns the user the mobile role
   }
   if ($_SESSION['mobile-tools-site-type'] == 'mobile' || $theme_switched) {
