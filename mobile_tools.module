@@ -948,7 +948,9 @@ function mobile_tools_get_redirect_url() {
   $query = (count($query) > 0) ? implode('&', $query) : '';
   //create the path and reassemble
   $base = preg_replace('{/$}', '', variable_get('mobile_tools_mobile_url', ''));
-  return $base . url($_GET['q'], array('query' => $query));
+  $url = url($base . '/' . $_GET['q'], array('query' => $query));
+  return $url;
+
 }
 
 /**
