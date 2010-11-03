@@ -40,13 +40,19 @@ function mobile_tools_is_mobile_ctools_access_settings(&$form, &$form_state, $co
     '#default_value' => $conf['description'],
     '#description' => t('A description for this test for administrative purposes.'),
   );
-  $form['settings']['mobile'] = array(
+  $form['settings']['mobile_any'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Mobile brower'),
+    '#default_value' => $conf['mobile_any'],
+    '#description' =>  t('Access will be granted if the client browser is any mobile.'),
+  );
+  $form['settings']['mobile_list'] = array(
     '#type' => 'select',
     '#title' => t('User Agent'),
-    '#default_value' => $conf['mobile'],
+    '#default_value' => $conf['mobile_list'],
     '#options' => $options,
     '#multiple' => TRUE,
-    '#description' =>  t('Access will be granted if the client browser matches.'),
+    '#description' =>  t('Access will be granted if the client browser matches the specific groups.'),
   );
 }
 
@@ -55,8 +61,12 @@ function mobile_tools_is_mobile_ctools_access_settings(&$form, &$form_state, $co
  */
 function mobile_tools_is_mobile_ctools_access_check($conf, $contexts) {
   $browser = mobile_tools_is_mobile_device();
-  $access = in_array($browser['group'], $conf['mobile']);
-  if (in_array($browser['type'], $conf['mobile']) && $browser['type'] == 'mobile') {
+  if ($conf['mobile_any'] && $browser['type'] == 'mobile') {
+    return TRUE;
+  }
+
+  $access = in_array($browser['group'], $conf['mobile_list']);
+  if (in_array($browser['type'], $conf['mobile_list']) && $browser['type'] == 'mobile') {
     return TRUE;
   }
   return $access;
