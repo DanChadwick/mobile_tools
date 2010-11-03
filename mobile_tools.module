@@ -27,7 +27,7 @@
 function mobile_tools_help($path, $arg) {
   switch ($path) {
       case 'admin/help#mobile_tools':
-        return '<p>'. t('The mobile tools module assembles a range of functionality helping out in making your Drupal site mobile. Visit the !documentation for more information') .'<p>';
+        return '<p>'. t('The mobile tools module assembles a range of functionality helping out in making your Drupal site mobile. Visit the !documentation for more information', array('!documentation' => l('documentation page', 'http://drupal.org/node/459686'))) .'<p>';
     }
 }
 /**
