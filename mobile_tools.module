@@ -162,7 +162,7 @@ function mobile_tools_configuration_form() {
   
   $form['mobile_tools_redirection']['mobile_tools_cookie_session'] = array (
     '#type' => 'textfield',
-    '#title' => 'Redirection cookie lifetime (seconds)',
+    '#title' => 'Redirection cookie    (seconds)',
     '#description' => t('This field is only used when using the nomobile=true setting. This is the lifetime of the cookie that determines how long the session is remembered. Choose 0 for only the session.'),
     '#default_value' => variable_get('mobile_tools_cookie_session', 3600*24*30),
   );
@@ -315,7 +315,6 @@ function mobile_tools_themes_configuration_form() {
 
    // for each group, checkbox and dropdown
    // Mobile
-
    $mobile_groups = module_invoke(variable_get('mobile-tools-device-detection', 'mobile_tools'), 'device_groups');
    $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
    foreach ($mobile_groups as $group => $group_title) {

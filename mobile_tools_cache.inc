@@ -204,7 +204,7 @@ function cache_clear_all($cid = NULL, $table = NULL, $wildcard = FALSE) {
  * for several device groups
  */
 function cache_rewrite_cid(&$cid){
-  require_once(__DIR__ . '/mobile_tools.module');
+  require_once(dirname(__FILE__) . '/mobile_tools.module');
   $result =  _mobile_tools_is_mobile_device();
   $query = $_GET;
   unset($query['q']);
