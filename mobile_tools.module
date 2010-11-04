@@ -235,6 +235,14 @@ function mobile_tools_configuration_form() {
 }
 
 /**
+ * Validation of the system settings form
+ */
+function mobile_tools_configuration_form_validate($form, &$form_state) {
+  $form_state['values']['mobile_tools_mobile_url'] = preg_replace('{/$}', '', $form_state['values']['mobile_tools_mobile_url']);
+  $form_state['values']['mobile_tools_desktop_url'] = preg_replace('{/$}', '', $form_state['values']['mobile_tools_desktop_url']);
+}
+
+/**
  * Configuration of external modules
  *  
  */
@@ -341,6 +349,8 @@ function mobile_tools_themes_configuration_form() {
    }
    return system_settings_form($form);
 }
+
+
 /**
  * Helper function to return the configuration options
  */ 
@@ -382,9 +392,9 @@ function mobile_tools_site_type_options() {
  */ 
 function mobile_tools_redirection_boot() {
  global $base_url;
- //only consider redirectoin if the mobile url and the destkop url are different
- $mobile_url = preg_replace('{/$}', '', variable_get('mobile_tools_mobile_url', ''));
- $desktop_url = preg_replace('{/$}', '', variable_get('mobile_tools_desktop_url', ''));
+ //only consider redirection if the mobile url and the destkop url are different
+ $mobile_url = variable_get('mobile_tools_mobile_url', '');
+ $desktop_url = variable_get('mobile_tools_desktop_url', '');
  if ($mobile_url != $desktop_url) {
    // Checking the possible arguments
    $session_time = time() + variable_get('mobile_tools_cookie_session', 3600*24*30);
