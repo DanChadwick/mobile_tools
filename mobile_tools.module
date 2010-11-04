@@ -69,6 +69,7 @@ function mobile_tools_menu() {
     'page callback' => 'drupal_get_form',
      'access arguments' => array('configure Mobile Tools'),
     'type' => MENU_LOCAL_TASK,
+    'file' => 'mobile_tools_roles.inc',
     'weight' => 0,
   );
   $items['admin/settings/mobile-tools/ext'] = array(
