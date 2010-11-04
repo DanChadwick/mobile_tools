@@ -70,7 +70,7 @@ function mobile_tools_roles_configuration_form() {
     '#title' => t('Mobile roles'),
     '#collapsible' => TRUE,
     '#description' => t('Enable or disable the mobile version of each user role. When no mobile role is created, the user will
-    keep it\'s normal role . the settings can also be configured in the !roles configuration section', array('!roles' => l('roles', 'admin/user/roles'))),
+    keep its normal role. The settings can also be configured in the !roles configuration section.', array('!roles' => l('roles', 'admin/user/roles'))),
     '#suffix' => mobile_tools_roles_overview()
   );
   

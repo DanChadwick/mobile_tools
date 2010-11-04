@@ -187,7 +187,7 @@ function mobile_tools_configuration_form() {
     '#title' => t('Mobile Tools block message options'),
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
-    '#description' => t('You can create a block with a different message on the mobile site then the desktop site. This can be for example used to create a link back to the deskop or mobile site (e.g. view Mobile | Desktop)'),
+    '#description' => t('You can create a block with a different message on the mobile site than the desktop site. This can be for example used to create a link back to the deskop or mobile site (e.g. view Mobile | Desktop)'),
   );
 
   $form['mobile_tools_notification']['mobile_notification'] = array(
