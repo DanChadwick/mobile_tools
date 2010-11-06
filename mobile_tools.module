@@ -2,34 +2,32 @@
 // $Id$
 /**
  * @file
- * Mobile Tools provides a range of functionality assisting in creating a mobile drupal site . this functionality contains:
+ * Mobile Tools provides a range of functionality assisting in creating a mobile Drupal site . this functionality contains:
  * - User Agent detection ('mobile' or 'desktop')
  * - automatic redirection towards mobile site or user notification by means of a block message or drupal_set_message
  * - Adding a mobile context to the permission system
- * - Adding a mobile context to theming (= theme switching or seperate configuration for desktop and )     
+ * - Adding a mobile context to theming (= theme switching or separate configuration for desktop and )     
  *  
  * For more documentation and examples please go to http://drupal.org/node/459686
  */ 
  
- /* The default messages being displayed to the users . these can be overwritten in 
-  * the configuration panel
-  */    
- define('MOBILE_NOTIFICATION', '<a href="">Mobile View</a>');
- define('DESKTOP_NOTIFICATION', '<a href="">Regular View</a>');
+/* The default messages being displayed to the users . these can be overwritten in 
+* the configuration panel
+*/    
+define('MOBILE_NOTIFICATION', '<a href="">Mobile View</a>');
+define('DESKTOP_NOTIFICATION', '<a href="">Regular View</a>');
 
- 
- /*****************                                   
-  * Drupal hooks  *
-  *****************/     
- /**
- * Implementation of hook_help($section).
- */ 
+
+/**
+* Implementation of hook_help($section).
+*/ 
 function mobile_tools_help($path, $arg) {
   switch ($path) {
-      case 'admin/help#mobile_tools':
-        return '<p>'. t('The mobile tools module assembles a range of functionality helping out in making your Drupal site mobile. Visit the !documentation for more information', array('!documentation' => l('documentation page', 'http://drupal.org/node/459686'))) .'<p>';
-    }
+    case 'admin/help#mobile_tools':
+    return '<p>'. t('Visit the !documentation for more info', array('!documentation' => l('documentation page', 'http://drupal.org/node/459686'))) .'<p>';
+  }
 }
+
 /**
  * Implementation of hook_perm().
  */
@@ -809,10 +807,12 @@ function mobile_tools_form_alter(&$form, $form_state, $form_id) {
       }
       break;
     case 'user_profile_form':
-        // We make sure that the mobile roles are not being displayed
-        $mobile_roles = mobile_tools_mobile_user_roles();
-        foreach($mobile_roles as $rid => $role) {
-          unset($form['account']['roles']['#options'][$rid]);
+        if (variable_get('mobile_tools_enable_roles', 0) ) {
+          // We make sure that the mobile roles are not being displayed
+          $mobile_roles = mobile_tools_mobile_user_roles();
+          foreach($mobile_roles as $rid => $role) {
+            unset($form['account']['roles']['#options'][$rid]);
+          }
         }
       break;
     case 'node_configure':
