@@ -991,7 +991,7 @@ function mobile_tools_get_redirect_url() {
 function mobile_tools_content_build_modes() {
   return array(
     'mobile_tools' => array(
-      'title' => t('RSS'),
+      'title' => t('Mobile theme'),
       'build modes' => array(
         'mobile_tools' => array(
           'title' => t('Mobile theme'),
@@ -1006,7 +1006,7 @@ function mobile_tools_content_build_modes() {
  * Implementation of hook_nodeapi
  */
 function mobile_tools_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  if ($op == 'load' && $_SESSION['mobile-tools-site-type'] == 'mobile' && variable_get('mobile_tools_enable_build_mode', 0)) {
+  if ($op == 'load' && mobile_tools_is_mobile_site() && variable_get('mobile_tools_enable_build_mode', 0)) {
     $node->build_mode = 'mobile_tools';
   }
 }
