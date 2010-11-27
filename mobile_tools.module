@@ -628,7 +628,7 @@ function _mobile_tools_message() {
  * This function is in charge of changing to the mobile theme 
  */ 
 function mobile_tools_themes_boot() {
-  global $conf, $user, $custom_theme;
+  global $conf, $custom_theme;
   if ( ($_SESSION['mobile-tools-site-type'] == 'mobile' &&  variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-url') || (variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-device' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
     global $conf;
     $group = $_SESSION['mobile-tools-mobile-device']['group'];
@@ -1005,3 +1005,12 @@ function mobile_tools_content_build_modes() {
     ),
   );
 }
+
+/**
+* Implementation of hook_nodeapi
+*/
+function mobile_tools_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'load' && mobile_tools_is_mobile_site() && variable_get('mobile_tools_enable_build_mode', 0)) {
+    $node->build_mode = 'mobile_tools';
+  }
+} 
