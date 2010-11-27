@@ -93,21 +93,56 @@ function mobile_tools_menu() {
  */ 
 function mobile_tools_boot() {
   global $conf, $user, $base_url;
+  // skip the process if we find a cookie
+  if(!mobile_tools_process_cookie()){
+    return;
+  }
   $_SESSION['mobile-tools-mobile-device'] = mobile_tools_is_mobile_device();
   $_SESSION['mobile-tools-site-type'] = mobile_tools_is_mobile_site();
+  
   // First redirect if needed
   mobile_tools_redirection_boot();  
   // Secondly do the theme switch
   $theme_switched = mobile_tools_themes_boot(); 
+  if ($_SESSION['mobile-tools-site-type'] == 'mobile' || $theme_switched) {
+    $conf['default_nodes_main'] = variable_get('default_nodes_main_mobile', 5);
+  } 
   
+  // include the mobile tools roles file  
   if (variable_get('mobile_tools_enable_roles', 0) ) {
     include(dirname(__FILE__) . '/mobile_tools_roles.inc');
     mobile_tools_roles_boot();  // assigns the user the mobile role
   }
-  if ($_SESSION['mobile-tools-site-type'] == 'mobile' || $theme_switched) {
-    $conf['default_nodes_main'] = variable_get('default_nodes_main_mobile', 5);
-  } 
 }
+
+/**
+ * Processing the cookie
+ */
+function mobile_tools_process_cookie(){
+  // Checking the possible arguments
+  $session_time = time() + variable_get('mobile_tools_cookie_session', 3600*24*30);
+  if (isset($_GET['nomobile'])) {
+   if (strtolower($_GET['nomobile']) == 'true') {
+      $switch = FALSE;
+      setCookie('mobile_tools_switch', 0, variable_get('mobile_tools_cookie_lifetime', $session_time) , '/'); 
+    } 
+    elseif (strtolower($_GET['nomobile']) == 'false') {
+      $switch = TRUE;
+      setCookie('mobile_tools_switch', 1, variable_get('mobile_tools_cookie_lifetime',$session_time) , '/');
+    }
+  } 
+  else {
+    // keep cookie if set, else set to true (default)
+    if (!isset($_COOKIE['mobile_tools_switch'])) {
+      $switch = TRUE;
+      setCookie('mobile_tools_switch', 1, $session_time, '/' );
+    } 
+    else {
+      $switch = (boolean)$_COOKIE['mobile_tools_switch'];
+    }
+  }
+  return $switch;
+} 
 
 /******************************
  * General configuration form *
@@ -407,52 +442,30 @@ function mobile_tools_site_type_options() {
  * This function is in charge of device detection, redirection or displaying a notification 
  */ 
 function mobile_tools_redirection_boot() {
- global $base_url;
- //only consider redirection if the mobile url and the destkop url are different
- $mobile_url = variable_get('mobile_tools_mobile_url', '');
- $desktop_url = variable_get('mobile_tools_desktop_url', '');
- if ($mobile_url != $desktop_url) {
-   // Checking the possible arguments
-   $session_time = time() + variable_get('mobile_tools_cookie_session', 3600*24*30);
-   if (isset($_GET['nomobile'])) {
-     if (strtolower($_GET['nomobile']) == 'true') {
-        $redirect = 'FALSE';
-        setCookie('mt_redirect', 'false', variable_get('mobile_tools_cookie_lifetime', $session_time) , '/'); 
-      } 
-      elseif (strtolower($_GET['nomobile']) == 'false') {
-        $redirect = 'TRUE';
-        setCookie('mt_redirect', 'true', variable_get('mobile_tools_cookie_lifetime',$session_time) , '/');
-      }
-   } 
-   else {
-      // keep cookie if set, else set to true (default)
-      if (!isset($_COOKIE['mt_redirect'])) {
-        $redirect = TRUE;
-        setCookie('mt_redirect', 'true', $session_time, '/' );
-      } 
-      else {
-        $redirect = $_COOKIE['mt_redirect'];
+  global $base_url;
+  //only consider redirection if the mobile url and the destkop url are different
+  $mobile_url = variable_get('mobile_tools_mobile_url', '');
+  $desktop_url = variable_get('mobile_tools_desktop_url', '');
+  
+  // code takes into account path exceptions
+  $pages = variable_get('mobile_tools_redirect_exceptions', '');
+  $page_match = FALSE;
+  if(isset($_GET['q']) && $pages != '') {
+    //check if there is no exception in the redirect path (code comes from block.module)
+    include_once './includes/bootstrap.inc';
+    drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+     $path = drupal_get_path_alias($_GET['q']);
+      // Compare with the internal and path alias (if any).
+     $page_match = drupal_match_path($path, $pages);
+      if ($path != $_GET['q']) {
+        $page_match = $page_match || drupal_match_path($_GET['q'], $pages);
       }
     }
-    
-    $pages = variable_get('mobile_tools_redirect_exceptions', '');
-    $page_match = FALSE;
-    if(isset($_GET['q']) && $pages != '') {
-	    //check if there is no exception in the redirect path (code comes from block.module)
-	  include_once './includes/bootstrap.inc';
-	  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-	   $path = drupal_get_path_alias($_GET['q']);
-	    // Compare with the internal and path alias (if any).
-	   $page_match = drupal_match_path($path, $pages);
-	    if ($path != $_GET['q']) {
-	      $page_match = $page_match || drupal_match_path($_GET['q'], $pages);
-	    }
+    if (variable_get('mobile_tools_redirect_exceptions', 0) == 'only-redirect') {
+      $page_match = !$page_match;
     }
-     if (variable_get('mobile_tools_redirect_exceptions', 0) == 'only-redirect') {
-        $page_match = !$page_match;
-     }
     // Redirections 
-    if (variable_get('mobile_tools_redirect', FALSE) && $redirect == 'true' && !$page_match) {
+    if (variable_get('mobile_tools_redirect', FALSE) && !$page_match) {
       // The case where a mobile user is accessing the desktop site
       if ($_SESSION['mobile-tools-mobile-device']['type'] == 'mobile' && $_SESSION['mobile-tools-site-type'] == 'desktop') {
           $destination = mobile_tools_get_redirect_url();
@@ -464,7 +477,7 @@ function mobile_tools_redirection_boot() {
          mobile_tools_goto($destination);
       }
     }
-  }
+  
 }
 
 /**
