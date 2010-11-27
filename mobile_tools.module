@@ -628,18 +628,18 @@ function _mobile_tools_message() {
  * This function is in charge of changing to the mobile theme 
  */ 
 function mobile_tools_themes_boot() {
-  global $conf;
+  global $conf, $user, $custom_theme;
   if ( ($_SESSION['mobile-tools-site-type'] == 'mobile' &&  variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-url') || (variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-device' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
     global $conf;
     $group = $_SESSION['mobile-tools-mobile-device']['group'];
     $type = $_SESSION['mobile-tools-mobile-device']['type'];
     $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
     if (variable_get($mobile_detection_module . '_' . $group . '_enable', '') == 1) {
-      $conf['theme_default'] = variable_get($mobile_detection_module . '_' . $group . '_theme', $conf['theme_default']);
+      $custom_theme = variable_get($mobile_detection_module . '_' . $group . '_theme', $conf['theme_default']);
       return TRUE;
     } 
     else {
-      $conf['theme_default'] = variable_get('mobile_tools_theme_name', $conf['theme_default']);
+      $custom_theme  = variable_get('mobile_tools_theme_name', $conf['theme_default']);
       return TRUE;
     }
   }
