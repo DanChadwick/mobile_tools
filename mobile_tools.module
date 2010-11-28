@@ -142,7 +142,8 @@ function mobile_tools_process_cookie(){
     }
   }
   return $switch;
-} 
+}
+
 
 /******************************
  * General configuration form *
@@ -477,7 +478,6 @@ function mobile_tools_redirection_boot() {
          mobile_tools_goto($destination);
       }
     }
-  
 }
 
 /**
@@ -641,11 +641,34 @@ function _mobile_tools_message() {
  * This function is in charge of changing to the mobile theme 
  */ 
 function mobile_tools_themes_boot() {
-  global $conf, $custom_theme;
-  if ( ($_SESSION['mobile-tools-site-type'] == 'mobile' &&  variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-url') || (variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-device' && $_SESSION['mobile-tools-mobile-device']['type']  == 'mobile') ) {
-    global $conf;
-    $group = $_SESSION['mobile-tools-mobile-device']['group'];
-    $type = $_SESSION['mobile-tools-mobile-device']['type'];
+  global $custom_theme, $conf;
+  // check if theme switching is forced
+  // TODO: This is not the most beautifull code :)
+  $session_time = time() + variable_get('mobile_tools_cookie_session', 3600*24*30);
+  if (isset($_GET['mt_device']) || isset($_COOKIE['mobile_tools_group'])) {
+    $group = isset($_GET['mt_device']) ? $_GET['mt_device'] : $_COOKIE['mobile_tools_group'];
+    $groups = mobile_tools_device_groups();
+    if($group == 'desktop'){
+      $device_type = 'desktop';
+      setCookie('mobile_tools_group', 'desktop', 0, '/' );
+    }
+    if($group == 'mobile'){
+       $device_type = 'desktop';
+       setCookie('mobile_tools_group', 'mobile', 0, '/' );
+    }
+    elseif(!empty($groups[$group])){
+      $device_type = 'mobile';
+      setCookie('mobile_tools_group', $group, 0, '/' );      
+    } 
+    else {
+      unset($group);
+      setCookie('mobile_tools_group', '', time()-3600, '/' );
+    }
+  } 
+  $site_type = isset($site_type) ? $site_type : $_SESSION['mobile-tools-site-type']; 
+  $device_type = isset($device_type) ? $device_type : $_SESSION['mobile-tools-mobile-device']['type']; 
+  if (($site_type == 'mobile' &&  variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-url') || (variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-device' && $device_type  == 'mobile') ) {
+    $group = isset($group) ? $group : $_SESSION['mobile-tools-mobile-device']['group'];
     $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
     if (variable_get($mobile_detection_module . '_' . $group . '_enable', '') == 1) {
       $custom_theme = variable_get($mobile_detection_module . '_' . $group . '_theme', $conf['theme_default']);
