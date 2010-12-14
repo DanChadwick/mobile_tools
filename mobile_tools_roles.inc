@@ -91,6 +91,7 @@ function mobile_tools_roles_configuration_form() {
 }
 
 function mobile_tools_roles_overview() {
+  $output = '';
   $query = "SELECT * FROM {mobile_tools_roles_relations}";
   $result = db_query($query);
   $rows = array();
@@ -172,8 +173,13 @@ function mobile_tools_mobile_user_roles() {
   $query = "SELECT COUNT(*) as count, mrid FROM {mobile_tools_roles_relations} WHERE rid = %d GROUP BY mrid";
   $result = db_query($query, $rid);
   $item = db_fetch_object($result);
- 
-  if ($item->count != 0) {
+  if(is_object($item)){
+    $count = $item->count;
+  }
+  else{
+    $count = 0;
+  }
+  if ($count != 0) {
     $role->type = 'desktop';
     $role->has_sibling = 1;
     $result = db_query("SELECT * FROM {role} WHERE rid = %d", $item->mrid);
@@ -182,7 +188,7 @@ function mobile_tools_mobile_user_roles() {
   else {
     $result = db_query("SELECT COUNT(*) as count, rid FROM {mobile_tools_roles_relations} WHERE mrid = %d GROUP BY rid", $rid);
     $item = db_fetch_object($result); 
-    if ($item->count == 0) {
+    if ($count == 0) {
       $role->has_sibling = 0;
       $role->type = 'desktop';
     } 
@@ -193,8 +199,11 @@ function mobile_tools_mobile_user_roles() {
       $sibling = db_fetch_object($result);
     }
   }
-  $role->sibling['id'] = $sibling->rid;
-  $role->sibling['name'] = $sibling->name ;
+  if(isset($sibling)){
+    $role->sibling['id'] = $sibling->rid;
+    $role->sibling['name'] = $sibling->name ;
+  }
+
   return $role;
 } 
 
