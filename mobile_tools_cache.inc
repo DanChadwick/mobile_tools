@@ -7,8 +7,8 @@
  *  on device type and device group.
  *  
  *  In order to enable this file, add the following to your settings.php file
- *  $conf['page_cache_fastpath'] = FALSE,
- *  $conf['cache_inc'] = './sites/all/modules/mobile_tools/mobile_tools_cache.inc',
+ *  $conf['page_cache_fastpath'] = FALSE;
+ *  $conf['cache_inc'] = './sites/all/modules/mobile_tools/mobile_tools_cache.inc';
  * );
  *
  */
