@@ -110,7 +110,7 @@ function mobile_tools_block($op = 'list',  $delta = 0, $edit = array()) {
  *  Helper function returning the configurable message for the notification
  */ 
 function mobile_tools_block_message() {
-  $device = mobile_tools_get_device();
+  $mobile_tools_device = mobile_tools_get_device();
   $site = mobile_tools_is_mobile_site();
   if (variable_get('mobile_tools_mobile_url', '') != variable_get('mobile_tools_desktop_url', '')) {
     if ($site  == 'mobile' ) {
@@ -132,18 +132,26 @@ function mobile_tools_block_message() {
 
 /**
  *  Implementation of hook_boot().
- *  Hook boot is called for both anonymous users and logged in users
+ *  Redirecting if needed
  */ 
 function mobile_tools_boot() {
-  global $conf, $user, $base_url;
+  global $conf, $user, $base_url, $mobile_tools_device;
   // Get the device object
-  $device =  mobile_tools_get_device();
+  $mobile_tools_device =  mobile_tools_get_device();
   // First call the redirect function. This will redirect the userif needed.
   if(variable_get('mobile_tools_redirect', FALSE)){
-    $redirected = mobile_tools_device_redirect($device);
+    $redirected = mobile_tools_device_redirect($mobile_tools_device);
   }
-  // Switch theme if needed
-  $theme_switched = mobile_tools_switch_theme($device);
+}
+
+/**
+ * Theme switching:
+ * - Only for non cached pages!
+ */
+function mobile_tools_init(){
+  global $mobile_tools_device;
+   // Switch theme if needed
+  $theme_switched = mobile_tools_switch_theme($mobile_tools_device);
   // Some small extras 
   if (mobile_tools_is_mobile_site() == 'mobile' || $theme_switched) {
     $conf['default_nodes_main'] = variable_get('default_nodes_main_mobile', variable_get('default_nodes_main', 10));
