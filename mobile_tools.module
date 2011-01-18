@@ -121,7 +121,7 @@ function mobile_tools_block_message() {
     }
   } 
   else {
-   if ($device['type']  == 'mobile' ) {
+   if ($mobile_tools_device['type']  == 'mobile' ) {
       return variable_get('mobile_notification', MOBILE_NOTIFICATION);
     } 
     else {
@@ -248,7 +248,10 @@ function mobile_tools_switch_theme($device) {
  *  The $device object 
  */
 function mobile_tools_get_device(){
-  global $cookie_domain;
+  global $cookie_domain, $mobile_tools_device;
+  if(isset($mobile_tools_device)){
+    return $mobile_tools_device;
+  }
   // Checking the possible arguments
   $session_time = time() + variable_get('mobile_tools_cookie_session', 3600*24*30);
   //first check if the device type is forced in the device argument
