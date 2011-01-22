@@ -135,13 +135,14 @@ function mobile_tools_block_message() {
  *  Redirecting if needed
  */ 
 function mobile_tools_boot() {
-  global $conf, $user, $base_url, $mobile_tools_device;
+  global $mobile_tools_device, $conf;
   // Get the device object
   $mobile_tools_device =  mobile_tools_get_device();
   // First call the redirect function. This will redirect the userif needed.
   if(variable_get('mobile_tools_redirect', FALSE)){
     $redirected = mobile_tools_device_redirect($mobile_tools_device);
   }
+ 
 }
 
 /**
@@ -149,19 +150,19 @@ function mobile_tools_boot() {
  * - Only for non cached pages!
  */
 function mobile_tools_init(){
-  global $mobile_tools_device;
+  global $mobile_tools_device, $conf;
    // Switch theme if needed
   $theme_switched = mobile_tools_switch_theme($mobile_tools_device);
-  // Some small extras 
-  if (mobile_tools_site_type() == 'mobile' || $theme_switched) {
-    $conf['default_nodes_main'] = variable_get('default_nodes_main_mobile', variable_get('default_nodes_main', 10));
-    $conf['site_frontpage'] = variable_get('site_frontpage_mobile', variable_get('site_frontpage', 'node'));
-  } 
+  // Some small extras   
   // include the mobile tools roles file if the setting is enabled
   if (variable_get('mobile_tools_enable_roles', 0) ) {
     include(dirname(__FILE__) . '/mobile_tools_roles.inc');
     mobile_tools_roles_boot();  // assigns the user the mobile role
   }
+  if (mobile_tools_site_type() == 'mobile') {
+    $conf['default_nodes_main'] = variable_get('default_nodes_main_mobile', variable_get('default_nodes_main', 10));
+    $conf['site_frontpage'] = variable_get('site_frontpage_mobile', variable_get('site_frontpage', 'node'));
+  } 
 }
 
 /**
@@ -403,13 +404,17 @@ function mobile_tools_site_type() {
 }
 
 function _mobile_tools_site_detection() {
-  global $base_url; 
+  global $base_url, $mobile_tools_device; 
+  
+  if(variable_get('mobile-tools-theme-switch', '' ) == 'mobile-tools-mobile-device' && $mobile_tools_device['type']  == 'mobile'){
+    return 'mobile';
+  } 
   // Check if $_SERVER variables are set if not, just return desktop... Still unclear what best solution is:
   if(!isset($_SERVER['HTTP_HOST']) && !isset($_SERVER['SERVER_NAME'])){
     return 'desktop';
   }
   $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
-    // first check if the url is a m.* or .mobi url. This is robuts
+    // first check if the url is a m.* or .mobi url. This is robust
   $server_domain_elements = explode('.', $host);
   if (count($server_domain_elements) > 0 ) {
     if ($server_domain_elements[0] == 'm') { // check for m.* domain
