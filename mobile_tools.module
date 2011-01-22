@@ -111,7 +111,7 @@ function mobile_tools_block($op = 'list',  $delta = 0, $edit = array()) {
  */ 
 function mobile_tools_block_message() {
   $mobile_tools_device = mobile_tools_get_device();
-  $site = mobile_tools_is_mobile_site();
+  $site = mobile_tools_site_type();
   if (variable_get('mobile_tools_mobile_url', '') != variable_get('mobile_tools_desktop_url', '')) {
     if ($site  == 'mobile' ) {
       return variable_get('mobile_notification', MOBILE_NOTIFICATION);
@@ -153,7 +153,7 @@ function mobile_tools_init(){
    // Switch theme if needed
   $theme_switched = mobile_tools_switch_theme($mobile_tools_device);
   // Some small extras 
-  if (mobile_tools_is_mobile_site() == 'mobile' || $theme_switched) {
+  if (mobile_tools_site_type() == 'mobile' || $theme_switched) {
     $conf['default_nodes_main'] = variable_get('default_nodes_main_mobile', variable_get('default_nodes_main', 10));
     $conf['site_frontpage'] = variable_get('site_frontpage_mobile', variable_get('site_frontpage', 'node'));
   } 
@@ -179,7 +179,7 @@ function mobile_tools_device_redirect($device) {
     return;
   }
   // see if the user is currently requestin the mobile or desktop url
-  $current_url_type = mobile_tools_is_mobile_site();
+  $current_url_type = mobile_tools_site_type();
   // code takes into account path exceptions in the configuration.
 
   $pages = variable_get('mobile_tools_redirect_exceptions', '');
@@ -221,7 +221,7 @@ function mobile_tools_device_redirect($device) {
 function mobile_tools_switch_theme($device) {
   global $custom_theme, $conf;
   // check if theme switching is forced
-  $current_url_type = mobile_tools_is_mobile_site(); 
+  $current_url_type = mobile_tools_site_type(); 
   if (($current_url_type == 'mobile' &&  variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-url') || (variable_get('mobile-tools-theme-switch', ''  ) == 'mobile-tools-mobile-device' && $device['type']  == 'mobile') ) {
     $group = $device['group'];
     $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
@@ -391,7 +391,7 @@ function _mobile_tools_is_mobile_device() {
 /**
  *  Detection of the site type . the values comes out the configuration form.
  */ 
-function mobile_tools_is_mobile_site() {
+function mobile_tools_site_type() {
   $site_detection = variable_get('mobile-tools-site-type-detection', 'mobile_tools');
   drupal_load('module', $site_detection);
    if ($site_detection == 'mobile_tools') {
@@ -691,8 +691,8 @@ function mobile_tools_ctools_plugin_directory($module, $plugin) {
 /**
 * Implementation of hook_nodeapi
 */
-function mobile_tools_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  if ($op == 'load' && mobile_tools_is_mobile_site() && variable_get('mobile_tools_enable_build_mode', 0)) {
+function mobile_tools_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {  
+  if ($op == 'load' && mobile_tools_site_type() == 'mobile' && variable_get('mobile_tools_enable_build_mode', 0)) {
     $node->build_mode = 'mobile_tools';
   }
 } 
