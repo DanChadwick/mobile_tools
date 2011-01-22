@@ -113,7 +113,7 @@ function mobile_tools_configuration_form() {
   
   $form['extra'] = array(
     '#type' => 'fieldset',
-    '#title' => 'extra',
+    '#title' => t('Additional settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );

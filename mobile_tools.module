@@ -607,7 +607,7 @@ function mobile_tools_form_alter(&$form, $form_state, $form_id) {
       $form['default_nodes_main_mobile'] = array(
             '#type' => 'select',
             '#title' => t('Number of posts on main page for the mobile version'),
-            '#default_value' => variable_get('default_nodes_main_mobile', variable_get('default_nodes_main')),
+            '#default_value' => variable_get('default_nodes_main_mobile', variable_get('default_nodes_main', 10)),
             '#options' => Array(
                     1 => 1,
                     2 => 2,
