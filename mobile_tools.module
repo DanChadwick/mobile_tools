@@ -65,16 +65,6 @@ function mobile_tools_menu() {
     'weight' => 0,
     'file' => 'mobile_tools.admin.inc',
   );  
-  $items['admin/settings/mobile-tools/roles'] = array(
-    'title' => 'Mobile roles',
-    'page arguments' => array('mobile_tools_roles_configuration_form'),
-    'page callback' => 'drupal_get_form',
-     'access arguments' => array('configure Mobile Tools'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'mobile_tools_roles.inc',
-    'weight' => 0,
-    'file' => 'mobile_tools_roles.inc',
-  );
   $items['admin/settings/mobile-tools/ext'] = array(
     'title' => 'External modules',
     'page arguments' => array('mobile_tools_external_modules_configuration_form'),
@@ -154,11 +144,6 @@ function mobile_tools_init(){
    // Switch theme if needed
   $theme_switched = mobile_tools_switch_theme($mobile_tools_device);
   // Some small extras   
-  // include the mobile tools roles file if the setting is enabled
-  if (variable_get('mobile_tools_enable_roles', 0) ) {
-    include(dirname(__FILE__) . '/mobile_tools_roles.inc');
-    mobile_tools_roles_boot();  // assigns the user the mobile role
-  }
   if (mobile_tools_site_type() == 'mobile') {
     $conf['default_nodes_main'] = variable_get('default_nodes_main_mobile', variable_get('default_nodes_main', 10));
     $conf['site_frontpage'] = variable_get('site_frontpage_mobile', variable_get('site_frontpage', 'node'));
@@ -571,44 +556,7 @@ function mobile_tools_create_mobile_url($url) {
  */ 
 function mobile_tools_form_alter(&$form, $form_state, $form_id) {
   switch ($form_id) {
-     case 'user_admin_role':
-      if (variable_get('mobile_tools_enable_roles', 0) ) {
-        $query = "SELECT COUNT(*) as count FROM {mobile_tools_roles_relations} WHERE mrid = %d";
-        $result = db_query($query, arg(4));
-        $item= db_fetch_object($result);
-        if (isset($item)) {
-          if ($item->count == 0) {
-            $form['mobile_tools_configure_role_'. arg(4)] = array(
-              '#type' => 'checkbox',
-              '#title' => t('Create a mobile context for this user role'),
-              '#default_value' => TRUE,
-              '#description' => t('check if you want to add a mobile context to this role. Adding a mobile context will result in the creation of a new role that will be assigned to the user when the site is beeing mobilized. When unchecking all configurations will be lost for that role.'),
-            );
-            $form['mobile_tools_role_type'] = array(
-              '#type' => 'hidden',
-              '#value' => 'desktop'
-            );
-          } 
-          else {
-            $form['mobile_tools_role_type'] = array(
-              '#type' => 'hidden',
-              '#value' => 'mobile'
-            );
-          }
-        $form['#submit'][] = 'mobile_tools_roles_configuration_submit';
-        }
-      }
-      break;
-    case 'user_profile_form':
-        if (variable_get('mobile_tools_enable_roles', 0) ) {
-          // We make sure that the mobile roles are not being displayed
-          $mobile_roles = mobile_tools_mobile_user_roles();
-          foreach($mobile_roles as $rid => $role) {
-            unset($form['account']['roles']['#options'][$rid]);
-          }
-        }
-      break;
-    case 'node_configure':
+      case 'node_configure':
       $form['default_nodes_main_mobile'] = array(
             '#type' => 'select',
             '#title' => t('Number of posts on main page for the mobile version'),

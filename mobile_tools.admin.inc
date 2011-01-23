@@ -16,21 +16,19 @@ function mobile_tools_configuration_form() {
   $form['mobile_tools_configuration'] = array(
     '#type' => 'fieldset',
     '#title' => 'General configuration',
-    '#description' => 'Enter the mobile and desktop url for your site. If both urls are equal there will be no redirection, but only theme switching. Go to "theme switching" to configure the theme',
+    '#description' => 'Enter the mobile and desktop url for your site. If both urls are equal there will be no redirection, but only theme switching. Go to "theme switching" to configure the theme.',
     '#collapsible' => TRUE,
   );
   
   $form['mobile_tools_configuration']['mobile_tools_mobile_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Mobile URL'),
-    '#required' => TRUE,
     '#description' => t('Give the name of your mobile site. It is recommended to use the convention of m.domain .com or www.domain.mobi'),
     '#default_value' => variable_get('mobile_tools_mobile_url', mobile_tools_create_mobile_url($base_url)),
   );
   $form['mobile_tools_configuration']['mobile_tools_desktop_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Desktop URL'),
-    '#required' => TRUE,
     '#description' => t('Give the name of your regular website.'),
     '#collapsible' => TRUE,
     '#default_value' => variable_get('mobile_tools_desktop_url', $base_url)
