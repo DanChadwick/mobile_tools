@@ -14,8 +14,8 @@
 /* The default messages being displayed to the users . these can be overwritten in 
 * the configuration panel
 */    
-define('MOBILE_NOTIFICATION', '<a href="">Mobile View</a>');
-define('DESKTOP_NOTIFICATION', '<a href="">Regular View</a>');
+define('MOBILE_NOTIFICATION', '<a href="">View full site</a>');
+define('DESKTOP_NOTIFICATION', '<a href="">View mobile site</a>');
 
 
 /**
@@ -100,23 +100,12 @@ function mobile_tools_block($op = 'list',  $delta = 0, $edit = array()) {
  *  Helper function returning the configurable message for the notification
  */ 
 function mobile_tools_block_message() {
-  $mobile_tools_device = mobile_tools_get_device();
   $site = mobile_tools_site_type();
-  if (variable_get('mobile_tools_mobile_url', '') != variable_get('mobile_tools_desktop_url', '')) {
-    if ($site  == 'mobile' ) {
-      return variable_get('mobile_notification', MOBILE_NOTIFICATION);
-    } 
-    else {
-      return variable_get('desktop_notification', DESKTOP_NOTIFICATION);
-    }
+  if ($site  == 'mobile' ) {
+    return variable_get('mobile_notification', MOBILE_NOTIFICATION);
   } 
-  else {
-   if ($mobile_tools_device['type']  == 'mobile' ) {
-      return variable_get('mobile_notification', MOBILE_NOTIFICATION);
-    } 
-    else {
-      return variable_get('desktop_notification', DESKTOP_NOTIFICATION);
-    } 
+  elseif($site == 'desktop') {
+    return variable_get('desktop_notification', DESKTOP_NOTIFICATION);
   }
 }
 
