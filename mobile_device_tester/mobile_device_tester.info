@@ -1,0 +1,6 @@
+; $Id$
+name = Mobile Device Tester
+description = Allows easy testing of a device for certain characteristics
+package = Mobile
+core = 6.x
+dependencies[] = wurfl
