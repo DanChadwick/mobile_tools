@@ -155,8 +155,8 @@ function mobile_tools_device_redirect($device) {
   }
   // see if the user is currently requestin the mobile or desktop url
   $current_url_type = mobile_tools_site_type();
-  // code takes into account path exceptions in the configuration.
 
+  // code takes into account path exceptions in the configuration.
   $pages = variable_get('mobile_tools_redirect_exceptions', '');
   $page_match = FALSE;
   if(isset($_GET['q']) && $pages != '') {
@@ -379,8 +379,8 @@ function mobile_tools_site_type() {
 
 function _mobile_tools_site_detection() {
   global $base_url, $mobile_tools_device; 
-  
-  if(variable_get('mobile-tools-theme-switch', '' ) == 'mobile-tools-mobile-device' && $mobile_tools_device['type']  == 'mobile'){
+  // Easy detection in case redireciton is disabled and device specific theme switching is enabled
+  if(!variable_get('mobile_tools_redirect', 0) && variable_get('mobile-tools-theme-switch', '' ) == 'mobile-tools-mobile-device' && $mobile_tools_device['type']  == 'mobile'){
     return 'mobile';
   } 
   // Check if $_SERVER variables are set if not, just return desktop... Still unclear what best solution is:
