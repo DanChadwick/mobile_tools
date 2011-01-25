@@ -121,7 +121,9 @@ function mobile_tools_boot() {
   if(variable_get('mobile_tools_redirect', FALSE)){
     $redirected = mobile_tools_device_redirect($mobile_tools_device);
   }
- 
+  if (mobile_tools_site_type() == 'mobile') {
+    $conf['site_frontpage'] = variable_get('site_frontpage_mobile', variable_get('site_frontpage', 'node'));
+  }
 }
 
 /**
@@ -135,7 +137,6 @@ function mobile_tools_init(){
   // Some small extras   
   if (mobile_tools_site_type() == 'mobile') {
     $conf['default_nodes_main'] = variable_get('default_nodes_main_mobile', variable_get('default_nodes_main', 10));
-    $conf['site_frontpage'] = variable_get('site_frontpage_mobile', variable_get('site_frontpage', 'node'));
   } 
 }
 

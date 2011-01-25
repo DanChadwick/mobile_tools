@@ -141,5 +141,5 @@ function mobile_tools_roles_form_alter(&$form, $form_state, $form_id) {
       foreach($mobile_roles as $mobile_role) {
         unset($form['account']['roles']['#options'][$mobile_role->mrid]);
       }
-  }
+    }
 }
