@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file mobile_tools_cache.inc
