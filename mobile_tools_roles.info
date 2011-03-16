@@ -3,3 +3,4 @@ name = Mobile User Roles
 description = "This module creates mobile user roles for each existing user role"
 core = 6.x
 package = Mobile
+dependencies[] = mobile_tools
