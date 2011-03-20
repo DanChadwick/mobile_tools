@@ -137,6 +137,16 @@ function mobile_tools_init(){
   if (mobile_tools_site_type() == 'mobile') {
     $conf['default_nodes_main'] = variable_get('default_nodes_main_mobile', variable_get('default_nodes_main', 10));
   } 
+  
+  /**
+   * We set the context
+   */
+   if(module_exists('context')){
+      $plugin = context_get_plugin('condition', 'mobile');
+      $device = mobile_tools_get_device();
+      $plugin->execute($device['type']);
+      $plugin->execute($device['group']);
+   }
 }
 
 /**
@@ -262,25 +272,6 @@ function mobile_tools_get_device(){
           setCookie('mt_device', $_COOKIE['mt_device'], variable_get('mobile_tools_cookie_lifetime', $session_time) , '/');
           return array('type' => 'mobile', 'group' => $_COOKIE['mt_device']);
         }
-    }
-  }
-  // backwards compatibility with the nomobile parameter
-  if (isset($_GET['nomobile'])) {
-   if (strtolower($_GET['nomobile']) == 'true') {
-      setCookie('mobile_tools_switch', 0, variable_get('mobile_tools_cookie_lifetime', $session_time) , '/'); 
-      return array('type' => 'desktop', 'group' => '');
-    } 
-    elseif (strtolower($_GET['nomobile']) == 'false') {
-      setCookie('mobile_tools_switch', 1, variable_get('mobile_tools_cookie_lifetime',$session_time) , '/');
-      return array('type' => 'mobile', 'group' => '');
-    }
-  } 
-  if(isset($_COOKIE['mobile_tools_switch'])) {
-    switch($_COOKIE['mobile_tools_switch']) {
-      case '0':
-        return array('type' => 'desktop', 'group' => '');
-      case '1':
-        return array('type' => 'mobile', 'group' => '');
     }
   }
   // we default to the real detection
@@ -652,6 +643,35 @@ function mobile_tools_content_build_modes() {
           'title' => t('Mobile theme'),
           'views style' => TRUE,
         ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_context_plugins
+ * We create mobile contexts
+ */
+function mobile_tools_context_plugins() {
+  $plugins = array();
+  $plugins['mobile_tools_context_condition_mobile'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'mobile_tools') .'/plugins',
+      'file' => 'mobile_tools_context_condition_mobile.inc',
+      'class' => 'mobile_tools_context_condition_mobile',
+      'parent' => 'context_condition',
+    ),
+  );
+  return $plugins;
+}
+
+function mobile_tools_context_registry() {
+  return array(
+    'conditions' => array(
+      'mobile' => array(
+        'title' => t('Context for mobile devices'),
+        'plugin' => 'mobile_tools_context_condition_mobile',
+        'description' => 'Choose for which device type or device group this context must apply',
       ),
     ),
   );
