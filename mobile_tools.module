@@ -238,7 +238,7 @@ function mobile_tools_get_device(){
         return array('type' => $_GET['device'], 'group' => '');
         break;
       case 'auto':
-        setCookie('mt_device', '', time()-3600);
+        setCookie('mt_device', '', time()-3600, '/');
         break;
       default:
         $device_groups = mobile_tools_device_groups();
@@ -254,7 +254,7 @@ function mobile_tools_get_device(){
         return array('type' => $_COOKIE['mt_device'], 'group' => '');
         break;
       case 'auto':
-        setCookie('mt_device', '', time()-3600);
+        setCookie('mt_device', '', time()-3600, '/');
         break;
       default:
         $device_groups = mobile_tools_device_groups();
@@ -446,6 +446,7 @@ function _mobile_tools_site_detection() {
  */
 function mobile_tools_device_groups() {
   $device_detection = variable_get('mobile-tools-device-detection', 'mobile_tools');
+  drupal_load('module', $device_detection);
   if ($device_detection != 'mobile_tools') {
     return module_invoke($device_detection, 'device_groups');
   } 
