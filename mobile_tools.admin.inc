@@ -197,31 +197,47 @@ function mobile_tools_themes_configuration_form() {
  //    '#prefix' => t('!configure your mobile theme', array('!configure' => l('Configure', 'admin/build/block/' . variable_get("mobile_tools_theme_name", FALSE)))),
   );
   
-  $form['mobile_tools_theme_configuration']['mobile_tools_hide_address_bar'] = array(
+  $form['mobile_tools_theme_configuration']['mobile_tools_additional_config'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Additional mobile specific theming configuration')
+  );
+  
+  $form['mobile_tools_theme_configuration']['mobile_tools_additional_config']['mobile_tools_hide_address_bar'] = array(
    '#type' => 'checkbox',
    '#title' => t('Automatically hide address bar in mobile theme (uses javascript and only work on javascript enabled devices)'),
    '#default_value' => variable_get('mobile_tools_hide_address_bar', 1),
    '#description' => t('Enabling this injects some line of javascript to hide the address bar when the page is loaded'),
+  );
+  
+  $form['mobile_tools_theme_configuration']['mobile_tools_additional_config']['mobile_tools_add_header'] = array(
+   '#type' => 'checkbox',
+   '#title' => t('Add Mobile Tools header'),
+   '#default_value' => variable_get('mobile_tools_add_header', 1),
+   '#description' => t('Add mobile specific headers into the header tag. This includes viewport, touch-icon, HandheldFriendly, ... See theme/mobile-tools-header.tpl.php'),
   );
 
    // for each group, checkbox and dropdown
    // Mobile
    $mobile_groups = module_invoke(variable_get('mobile-tools-device-detection', 'mobile_tools'), 'device_groups');
    $mobile_detection_module = variable_get('mobile-tools-device-detection', 'mobile_tools');
+   $form['mobile_tools_theme_configuration']['mobile_tools_group_config'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Configurations per device group'),
+   );
    foreach ($mobile_groups as $group => $group_title) {
-      $form['mobile_tools_theme_configuration'][$mobile_detection_module . '_' . $group] = array(
+      $form['mobile_tools_theme_configuration']['mobile_tools_group_config'][$mobile_detection_module . '_' . $group] = array(
         '#type' => 'fieldset',
         '#title' => $group_title,
         '#collapsible' => TRUE,
         
       );
-      $form['mobile_tools_theme_configuration'][$mobile_detection_module . '_' . $group][$mobile_detection_module . '_' . $group . '_enable'] = array(
+      $form['mobile_tools_theme_configuration']['mobile_tools_group_config'][$mobile_detection_module . '_' . $group][$mobile_detection_module . '_' . $group . '_enable'] = array(
         '#type' => 'checkbox',
         '#title' => t('Enable filter for this device group'),
         '#default_value' => variable_get($mobile_detection_module . '_' . $group . '_enable', ''),
         '#description' => t('Choose a theme for this device group'),
       );
-       $form['mobile_tools_theme_configuration'][$mobile_detection_module . '_' . $group][$mobile_detection_module . '_' . $group . '_theme'] = array(
+       $form['mobile_tools_theme_configuration']['mobile_tools_group_config'][$mobile_detection_module . '_' . $group][$mobile_detection_module . '_' . $group . '_theme'] = array(
          '#type' => 'select',
          '#title' => 'Mobile theme',
          '#default_value' => variable_get($mobile_detection_module . '_' . $group . '_theme', FALSE),

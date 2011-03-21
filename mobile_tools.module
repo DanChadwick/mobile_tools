@@ -77,6 +77,19 @@ function mobile_tools_menu() {
 } 
 
 /**
+ * Implementation of hook_theme()
+ */
+function mobile_tools_theme(){
+  $templates['mobile_tools_header'] = array(
+    'template' => 'mobile-tools-header',
+    'arguments' => array(),
+    'path' => drupal_get_path('module', 'mobile_tools') . '/theme',
+  );
+  
+  return $templates;
+}
+
+/**
  * Implementation of hook_block()
  * Provides the blocks that can be used to show a message to the user to go to the
  * mobile or desktop version.  
@@ -594,6 +607,13 @@ EOF;
   }
   return $output;
 }
+
+function mobile_tools_preprocess_page(&$vars){
+  $site = mobile_tools_site_type();
+  if(variable_get('mobile_tools_add_header', 1) && $site == 'mobile'){
+    $vars['head'] = $vars['head'] . theme('mobile_tools_header');
+  }  
+}
  
 /**
  * copy of drupal_goto, since this is called in hook_boot, while the function is not yet available
@@ -657,17 +677,30 @@ function mobile_tools_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
  * Implementation of hook_content_build_modes
  */
 function mobile_tools_content_build_modes() {
-  return array(
-    'mobile_tools' => array(
-      'title' => t('Mobile theme'),
-      'build modes' => array(
-        'mobile_tools' => array(
-          'title' => t('Mobile theme'),
-          'views style' => TRUE,
-        ),
+  $groups = mobile_tools_device_groups();
+  $modes = array();
+  foreach($groups as $group => $title){
+    $modes[$group] = array(
+      'title' => $title,
+      'views style' => TRUE,
+    );
+  }
+  $build_modes = array();
+  $build_modes['mobile_tools_groups'] = array(
+    'title' => 'Mobile Groups',
+    'build modes' => $modes,
+  );
+  $build_modes['mobile_tools_types'] = array(
+    'title' => 'Mobile Type',
+    'build modes' => array(
+      'mobile' => array(
+         'title' => 'Mobile',
+         'views style' => TRUE,
       ),
     ),
   );
+  
+  return $build_modes;
 }
 
 /**
