@@ -196,6 +196,13 @@ function mobile_tools_themes_configuration_form() {
      '#description' => t('Select your default mobile theme. You can specify a different theme for different devices.'),
  //    '#prefix' => t('!configure your mobile theme', array('!configure' => l('Configure', 'admin/build/block/' . variable_get("mobile_tools_theme_name", FALSE)))),
   );
+  
+  $form['mobile_tools_theme_configuration']['mobile_tools_hide_address_bar'] = array(
+   '#type' => 'checkbox',
+   '#title' => t('Automatically hide address bar in mobile theme (uses javascript and only work on javascript enabled devices)'),
+   '#default_value' => variable_get('mobile_tools_hide_address_bar', 1),
+   '#description' => t('Enabling this injects some line of javascript to hide the address bar when the page is loaded'),
+  );
 
    // for each group, checkbox and dropdown
    // Mobile
