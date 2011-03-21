@@ -669,7 +669,7 @@ function mobile_tools_ctools_plugin_directory($module, $plugin) {
 */
 function mobile_tools_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {  
   if ($op == 'load' && mobile_tools_site_type() == 'mobile' && variable_get('mobile_tools_enable_build_mode', 0)) {
-    $node->build_mode = 'mobile_tools';
+    $node->build_mode = 'mobile';
   }
 } 
 
@@ -686,12 +686,14 @@ function mobile_tools_content_build_modes() {
     );
   }
   $build_modes = array();
-  $build_modes['mobile_tools_groups'] = array(
+  // Needs some more thought in combining groups and types. We need to detect which build mode takes the lead
+/*  $build_modes['mobile_tools_groups'] = array(
     'title' => 'Mobile Groups',
     'build modes' => $modes,
   );
+*/
   $build_modes['mobile_tools_types'] = array(
-    'title' => 'Mobile Type',
+    'title' => 'Mobile Device',
     'build modes' => array(
       'mobile' => array(
          'title' => 'Mobile',
