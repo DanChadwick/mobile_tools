@@ -572,6 +572,28 @@ function mobile_tools_form_alter(&$form, $form_state, $form_id) {
       break;
   } 
 }
+
+/**
+ * Implementation of hook_footer() 
+ *  - inserting some javascript to hide navigation bar
+ */
+function mobile_tools_footer(){
+  $output = '';
+  $site =  mobile_tools_site_type();
+  if(variable_get('mobile_tools_hide_address_bar', 1) && $site == 'mobile'){
+    $output .= '<script type="text/javascript" charset="utf-8">';
+    $output .= <<<EOF
+    addEventListener('load', function() {
+    	setTimeout(hideAddressBar, 0);
+    }, false);
+    function hideAddressBar() {
+    	window.scrollTo(0, 1);
+    }
+EOF;
+    $output .= '</script>';
+  }
+  return $output;
+}
  
 /**
  * copy of drupal_goto, since this is called in hook_boot, while the function is not yet available
