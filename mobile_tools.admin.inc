@@ -46,7 +46,7 @@ function mobile_tools_configuration_form() {
     '#title' => t('Enable automatic redirection of the mobile user'),
     '#default_value' => variable_get('mobile_tools_redirect', FALSE),
     '#description' => 'Mobile visitors will automatically be redirected to the mobile site. But mobile users can also -- if they prefer --
-    view the desktop version. In order to do so, append ?mobile=false to the URL. The module
+    view the desktop version. In order to do so, append ?device=dekstop to the URL. The module
     will set a cookie that remembers that the user does not want to be redirected. To undo, send the user to /gomobile. The module will redirect
     the user to the mobile site and reset the cookie!',
   );
@@ -54,7 +54,7 @@ function mobile_tools_configuration_form() {
   $form['mobile_tools_redirection']['mobile_tools_cookie_session'] = array (
     '#type' => 'textfield',
     '#title' => 'Redirection cookie    (seconds)',
-    '#description' => t('This field is only used when using the mobile=false setting. This is the lifetime of the cookie that determines how long the session is remembered. Choose 0 for only the session.'),
+    '#description' => t('This field is only used when using the ?device= setting. This is the lifetime of the cookie that determines how long the session is remembered. Choose 0 for only the session.'),
     '#default_value' => variable_get('mobile_tools_cookie_session', 3600*24*30),
   );
   
@@ -77,7 +77,7 @@ function mobile_tools_configuration_form() {
     '#title' => t('Mobile Tools block message options'),
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
-    '#description' => t('You can create a block with a different message on the mobile site than the desktop site. This can be for example used to create a link back to the deskop or mobile site (e.g. view Mobile | Desktop)'),
+    '#description' => t('You can create a block with a different message on the mobile site than the desktop site. This can be for example used to create a link back to the deskop or mobile site.'),
   );
 
   $form['mobile_tools_notification']['mobile_notification'] = array(
@@ -85,12 +85,14 @@ function mobile_tools_configuration_form() {
     '#rows' => 2,
     '#title' => t('On the Mobile site'),
     '#default_value' => variable_get('mobile_notification', MOBILE_NOTIFICATION),
+    '#description' => t('Available token is !desktop_url. This will create the url back to the desktop site using ?device=desktop and maintaining the current path'),
   );
   $form['mobile_tools_notification']['desktop_notification'] = array(
     '#type' => 'textarea',
     '#title' => t('On the desktops site'),
     '#rows' => 2,
     '#default_value' => variable_get('desktop_notification', DESKTOP_NOTIFICATION),
+    '#description' => t('Available token is !desktop_url. This will create the url back to the mobile site using ?device=mobile and maintaining the current path.'),
   ); 
   
   

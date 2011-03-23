@@ -13,8 +13,8 @@
 /* The default messages being displayed to the users . these can be overwritten in 
 * the configuration panel
 */    
-define('MOBILE_NOTIFICATION', '<a href="">View full site</a>');
-define('DESKTOP_NOTIFICATION', '<a href="">View mobile site</a>');
+define('MOBILE_NOTIFICATION', '<a href="!desktop_url">View full site</a>');
+define('DESKTOP_NOTIFICATION', '<a href="!mobile_url">View mobile site</a>');
 
 
 /**
@@ -114,10 +114,24 @@ function mobile_tools_block($op = 'list',  $delta = 0, $edit = array()) {
 function mobile_tools_block_message() {
   $site = mobile_tools_site_type();
   if ($site  == 'mobile' ) {
-    return variable_get('mobile_notification', MOBILE_NOTIFICATION);
+    $output = variable_get('mobile_notification', MOBILE_NOTIFICATION);
+    $query = $_GET;
+    $query['device'] = 'desktop';
+    $query = drupal_query_string_encode($query, array('q'));
+    $url = url($_GET['q'], array('query' => $query));
+    $desktop_url = variable_get('mobile_tools_desktop_url', '') . $url;
+    $output = t($output, array('!desktop_url' => $desktop_url));
+    return $output;
   } 
   elseif($site == 'desktop') {
-    return variable_get('desktop_notification', DESKTOP_NOTIFICATION);
+    $output = variable_get('desktop_notification', DESKTOP_NOTIFICATION);
+    $query = $_GET;
+    $query['device'] = 'mobile';
+    $query = drupal_query_string_encode($query, array('q'));
+    $url = url($_GET['q'], array('query' => $query));
+    $mobile_url = variable_get('mobile_tools_mobile_url', '') . $url;
+    $output = t($output, array('!mobile_url' => $mobile_url));
+    return $output;
   }
 }
 
