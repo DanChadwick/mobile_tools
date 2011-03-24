@@ -208,7 +208,7 @@ function mobile_tools_device_redirect($device) {
     }
   }
   // check if exceptions are pages on which to redirect, or not to redirect
-  if (variable_get('mobile_tools_redirect_exceptions', 0) == 'only-redirect') {
+  if (variable_get('mobile_tools_redirect_exceptions_type', 0) == 'only-redirect') {
     $page_match = !$page_match;
   }
   // Redirections 
