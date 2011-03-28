@@ -511,14 +511,11 @@ function mobile_tools_prepare_url($url) {
  * cause the Global Redirect module not to redirect!  
  */ 
 function mobile_tools_get_redirect_url() {
-  include_once './includes/bootstrap.inc';
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_PATH);
-  // special Siruna delimitor 
+  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
   // collect query parameters
-   if(drupal_is_front_page()) {
+  if(drupal_is_front_page()) {
     return variable_get('mobile_tools_mobile_url', '');
-   }
-  
+  } 
   $query = array();
   foreach ($_GET as $key => $value) {
     if ($key != 'q') {
