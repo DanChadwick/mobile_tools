@@ -73,9 +73,44 @@ function mobile_tools_menu() {
     'weight' => 10,
     'file' => 'mobile_tools.admin.inc',
   );
+  
+  $items['mt/desktop/%mobile_tools_menu_link'] = array(
+   'title' => 'Full site',
+   'page callback' => 'mobile_tools_redirect_user',
+   'access callback' => 'mobile_tools_menu_link_access',
+   'access arguments' => array('desktop'),
+  );
+  
+  $items['mt/mobile/%mobile_tools_menu_link'] = array(
+   'title' => "Mobile Site",
+   'page callback' => 'mobile_tools_redirect_user',
+   'access callback' => 'mobile_tools_menu_link_access',
+   'access arguments' => array('mobile'),
+  );
   return $items;
 } 
 
+function mobile_tools_menu_link_access($target_site){
+  $current_site = mobile_tools_site_type();
+  if($target_site == $current_site){
+    return FALSE;
+  }
+  else {
+    return TRUE;
+  }
+}
+
+function mobile_tools_menu_link_to_arg($arg){
+  return $_GET['q'];
+}
+
+function mobile_tools_redirect_user(){
+ $args = arg();
+ array_shift($args);
+ $site = array_shift($args);
+ $path  = implode('/', $args);
+ drupal_goto($path, 'device=' . $site);
+}
 /**
  * Implementation of hook_theme()
  */
