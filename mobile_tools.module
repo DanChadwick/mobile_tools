@@ -398,8 +398,13 @@ function mobile_tools_site_type() {
 function _mobile_tools_site_detection() {
   global $base_url, $mobile_tools_device; 
   // Easy detection in case redireciton is disabled and device specific theme switching is enabled
-  if(!variable_get('mobile_tools_redirect', 0) && variable_get('mobile-tools-theme-switch', '' ) == 'mobile-tools-mobile-device' && $mobile_tools_device['type']  == 'mobile'){
-    return 'mobile';
+  if(!variable_get('mobile_tools_redirect', 0) && variable_get('mobile-tools-theme-switch', '' ) == 'mobile-tools-mobile-device'){
+    if($mobile_tools_device['type']  == 'mobile'){
+      return 'mobile';
+    }
+    else {
+      return 'desktop';
+    }
   } 
   // Check if $_SERVER variables are set if not, just return desktop... Still unclear what best solution is:
   if(!isset($_SERVER['HTTP_HOST']) && !isset($_SERVER['SERVER_NAME'])){
