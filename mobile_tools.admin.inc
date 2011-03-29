@@ -46,7 +46,7 @@ function mobile_tools_configuration_form() {
     '#title' => t('Enable automatic redirection of the mobile user'),
     '#default_value' => variable_get('mobile_tools_redirect', FALSE),
     '#description' => 'Mobile visitors will automatically be redirected to the mobile site. But mobile users can also -- if they prefer --
-    view the desktop version. In order to do so, append ?device=dekstop to the URL. The module
+    view the desktop version. In order to do so, append ?device=desktop to the URL. The module
     will set a cookie that remembers that the user does not want to be redirected. To undo, send the user to /gomobile. The module will redirect
     the user to the mobile site and reset the cookie!',
   );
