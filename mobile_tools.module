@@ -76,22 +76,26 @@ function mobile_tools_menu() {
   
   $items['mt/desktop/%mobile_tools_menu_link'] = array(
    'title' => 'Full site',
-   'page callback' => 'mobile_tools_redirect_user',
+   'page callback' => 'mobile_tools_menu_redirect_user',
    'access callback' => 'mobile_tools_menu_link_access',
    'access arguments' => array('desktop'),
   );
   
   $items['mt/mobile/%mobile_tools_menu_link'] = array(
    'title' => "Mobile Site",
-   'page callback' => 'mobile_tools_redirect_user',
+   'page callback' => 'mobile_tools_menu_redirect_user',
    'access callback' => 'mobile_tools_menu_link_access',
    'access arguments' => array('mobile'),
   );
   return $items;
 } 
 
+/**
+ *  Access function for the mobile tools menu links. It decides on which link to shown.
+ */
 function mobile_tools_menu_link_access($target_site){
   $current_site = mobile_tools_site_type();
+  // Only show the link if it's target is different then the current site
   if($target_site == $current_site){
     return FALSE;
   }
@@ -100,17 +104,24 @@ function mobile_tools_menu_link_access($target_site){
   }
 }
 
+/**
+ * Implementation of %mobile_tools_menu_link
+ */
 function mobile_tools_menu_link_to_arg($arg){
   return $_GET['q'];
 }
 
-function mobile_tools_redirect_user(){
- $args = arg();
- array_shift($args);
- $site = array_shift($args);
- $path  = implode('/', $args);
- drupal_goto($path, 'device=' . $site);
+/**
+ * Redirect the user to the right path
+ */
+function mobile_tools_menu_redirect_user(){
+  $args = arg();
+  array_shift($args);
+  $site = array_shift($args);
+  $path  = implode('/', $args);
+  drupal_goto($path, 'device=' . $site);
 }
+
 /**
  * Implementation of hook_theme()
  */
@@ -250,13 +261,13 @@ function mobile_tools_device_redirect($device) {
   if (!$page_match) {
     // The case where a mobile user is accessing the desktop site
     if ($device['type'] == 'mobile' && $current_url_type == 'desktop') {
-        $destination_url = mobile_tools_get_redirect_url();
+        $destination_url = mobile_tools_get_redirect_url('mobile');
         mobile_tools_goto($destination_url);
     // The case where a desktop user is accessing the mobile site 
     } 
     elseif ($device['type'] == 'desktop' && $current_url_type == 'mobile') {
-       $destination =  variable_get('mobile_tools_desktop_url', $base_url);
-       mobile_tools_goto($destination);
+       $destination_url = mobile_tools_get_redirect_url('desktop');
+       mobile_tools_goto($destination_url);
     }
   }
 }
@@ -550,11 +561,12 @@ function mobile_tools_prepare_url($url) {
  * Creation of the redirect url. Special care to create the correct url that will 
  * cause the Global Redirect module not to redirect!  
  */ 
-function mobile_tools_get_redirect_url() {
+function mobile_tools_get_redirect_url($destination_site) {
   drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+  $destination_url = ($destination_site == 'mobile') ? variable_get('mobile_tools_mobile_url', '') :  $destination =  variable_get('mobile_tools_desktop_url', ''); 
   // collect query parameters
   if(drupal_is_front_page()) {
-    return variable_get('mobile_tools_mobile_url', '');
+    return $destination_url;
   } 
   $query = array();
   foreach ($_GET as $key => $value) {
@@ -564,7 +576,8 @@ function mobile_tools_get_redirect_url() {
   }
   $query = (count($query) > 0) ? implode('&', $query) : '';
   //create the path and reassemble
-  $base = preg_replace('{/$}', '', variable_get('mobile_tools_mobile_url', ''));
+  
+  $base = preg_replace('{/$}', '', $destination_url);
   $url = url($base . '/' . $_GET['q'], array('query' => $query));
   return $url;
 }
