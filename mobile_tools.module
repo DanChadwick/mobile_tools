@@ -216,9 +216,11 @@ function mobile_tools_init(){
    */
    if(module_exists('context')){
       $plugin = context_get_plugin('condition', 'mobile');
-      $device = mobile_tools_get_device();
-      $plugin->execute($device['type']);
-      $plugin->execute($device['group']);
+      if(!$plugin){
+        $device = mobile_tools_get_device();
+        $plugin->execute($device['type']);
+        $plugin->execute($device['group']);
+      }
    }
 }
 
