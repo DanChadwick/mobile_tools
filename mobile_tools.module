@@ -244,7 +244,7 @@ function mobile_tools_device_redirect($device) {
   // code takes into account path exceptions in the configuration.
   $pages = variable_get('mobile_tools_redirect_exceptions', '');
   $page_match = FALSE;
-  if(isset($_GET['q']) && $pages != '') {
+  if($pages != '') {
     //check if there is no exception in the redirect path (code comes from block.module)
     include_once './includes/bootstrap.inc';
     drupal_bootstrap(DRUPAL_BOOTSTRAP_PATH);
